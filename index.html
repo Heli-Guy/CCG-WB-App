@@ -92,6 +92,7 @@ th{font-size:12px;color:var(--muted);font-weight:600}
 .seg label:first-child:has(input:checked){background:var(--nob);color:var(--notx)}
 .seg label:has(input:focus-visible){outline:2px solid #1f5fbf;outline-offset:-3px}
 .seg.two{grid-template-columns:repeat(2,86px)}
+.seg label:nth-child(n+5){border-top:1px solid var(--line)}.seg label:nth-child(5){border-left:none}
 .pside{display:flex;align-items:center;gap:10px;margin:-2px 0 10px;font-size:13px;font-weight:600}
 .pside .seg.two{grid-template-columns:repeat(2,124px)}
 .pside .seg label:first-child:has(input:checked){background:#1f5fbf;color:#fff}
@@ -368,8 +369,11 @@ label.f.big input{font-size:24px;font-weight:600}
 
 <script>
 // ---------- Version (raise by 0.01 for every implemented change) ----------
-const APP_VERSION = '0.22';
+const APP_VERSION = '0.25';
 const CHANGELOG = [
+  ['0.25', '3-Nov-2026', '412: attendant seat shown on the Load Sheet with addendum Y (water sampling hoist, ASD-P7-06) as well as with the litter kit. 412 drop-off check (passengers and cargo off-loaded) is now a note (WITHIN LIMITS · NOTES) instead of OUTSIDE LIMITS.'],
+  ['0.24', '3-Nov-2026', '412 operational gear can also be stowed at the pilot station (FS 47, BL +22), co-pilot station (FS 47, BL −22), 4-man seat (FS 85.7, BL 0) or 5-man seat (FS 114.7, BL 0); pilot/co-pilot follow the pilot seat selection.'],
+  ['0.23', '3-Nov-2026', '429 aft-row floor cargo arm FS 226 (midway between the seat rails, FS 218 and 234).'],
   ['0.22', '3-Nov-2026', 'Six tabs: Load Sheet, Addendums, Temp Changes, Operational Gear, Summary Sheet, Calculation Sheet. 429 fwd-row floor cargo arm FS 187.6 (midway between the seat rails, FS 179.6 and 195.6).'],
   ['0.21', '3-Nov-2026', 'Fill Max button: most fuel (up to full tanks) that keeps weight and CG within limits from takeoff to zero fuel, with the limiting factor shown. 429: floor-cargo field in place of removed passenger seats (adjacent removed seats share one field); cabin floor cargo limited to 1,200 lb forward of FS 238 and baggage compartment to 540 lb aft of FS 238 (RFM 1-5-C).'],
   ['0.20', '3-Nov-2026', 'Full tanks (1,475 lb on the 429) no longer flagged as exceeding tank capacity; launch splash screen; 429 blade tips stay white in dark mode.'],
@@ -550,7 +554,7 @@ const T429 = {
     ['Winter body & blade covers',53,'Not on board'],['Windshield & tailboom cover',22,'Not on board']],
   example:{w:{pilot:200, copilot:220, bm:250}, gear:{pilot:g4(1,1,0,0), copilot:g4(1,1,0,0), al:g4(1,0,1,1), ac:g4(1,0,1,1), ar:g4(1,0,1,1)}, fuel:1400},
   // Cargo strapped to the floor where passenger seats are removed (RFM 1-5-C). Adjacent removed seats in a row share one cargo field.
-  seatCargo:{rows:[{key:'F', label:'fwd row', fs:187.6, seats:[['fl',-18],['fc',0],['fr',18]]}, {key:'A', label:'aft row', fs:229, seats:[['al',-18],['ac',0],['ar',18]]}],
+  seatCargo:{rows:[{key:'F', label:'fwd row', fs:187.6, seats:[['fl',-18],['fc',0],['fr',18]]}, {key:'A', label:'aft row', fs:226, seats:[['al',-18],['ac',0],['ar',18]]}],
     blocked(){ return S.tre.includes('TRE-431-90-5-A') ? ['fl'] : []; }},   // Cineflex console occupies the fwd L/H seat position
   cargoLimits:{cabin:1200, cabinAftFS:238, bag:540, psf:55, ref:'RFM 1-5-C'},
   fuelTable(tail){ return FLEETS['Bell 429'].fuelTable.filter(x => has('L') || x.w <= 1474.92); },
@@ -613,7 +617,8 @@ const T412 = {
       case 'm1': case 'm2': return (!lit && !has('D')) ? st : null;
       case 'm3': return (!lit && !has('E')) ? st : null;
       case 'm4': case 'm5': return (!lit && !has('F')) ? st : null;
-      case 'att': case 'lit1': case 'lit2': case 'lit3': return lit ? st : null;
+      case 'att': return lit ? st : has('Y') ? {...st, name:'Attendant seat (water sampling hoist, addendum Y — ASD-P7-06)'} : null;
+      case 'lit1': case 'lit2': case 'lit3': return lit ? st : null;
       case 'ol1': case 'ol2': return has('G') ? st : null;
       case 'or1': case 'or2': return has('H') ? st : null;
       case 'cmid': return (has('D')||has('E')||has('F')) ? {...st, fs:108, dy:-40, name:'Cargo mid cabin floor', short:'CARGO M'} : st;
@@ -623,8 +628,9 @@ const T412 = {
       default: return st;
     }
   },
-  gearOpts:[['Not on board','Not on board'],['Aft cabin L','Aft cab L'],['Aft cabin R','Aft cab R'],['Tail baggage','Tail bag']],
-  locs:{'Aft cabin L':[149,-29.1],'Aft cabin R':[149,29.1],'Tail baggage':[254,0]},
+  gearOpts:[['Not on board','Not on board'],['Pilot station','Pilot'],['Co-pilot station','Co-pilot'],['4-man seat','4-man seat'],['5-man seat','5-man seat'],['Aft cabin L','Aft cab L'],['Aft cabin R','Aft cab R'],['Tail baggage','Tail bag']],
+  // Pilot / co-pilot stations follow the pilot seat selection (right seat normal, left seat for longline)
+  locs:{'Pilot station':[47,22,'pilotSide'],'Co-pilot station':[47,-22,'pilotSide'],'4-man seat':[85.7,0],'5-man seat':[114.7,0],'Aft cabin L':[149,-29.1],'Aft cabin R':[149,29.1],'Tail baggage':[254,0]},
   gear:[['Axe / saw',4,'Aft cabin R'],['Step ladder',24,'Aft cabin L'],['Fuel pump kit',54,'Aft cabin L'],['Gun and ammunition',12,'Not on board'],
     ['Sat phone',5,'Aft cabin R'],['412 tool box',61,'Aft cabin L'],['412 spare box',36,'Tail baggage'],['Dimmits & multimeter box',21,'Tail baggage'],
     ['Cabin net',5,'Tail baggage'],['Misc tie-down kits',6,'Aft cabin R'],['Servicing & tool kit',28,'Tail baggage'],['Sleeping bags (3)',15,'Not on board'],
@@ -735,7 +741,8 @@ function buildLoads(opts={}){
   }
   for (const g of GEARLIST){
     if (g.loc==='Not on board') continue;
-    const pos = g.loc==='Installed' ? g.inst : LOCS[g.loc];
+    let pos = g.loc==='Installed' ? g.inst : LOCS[g.loc];
+    if (pos && pos[2]==='pilotSide' && S.pilotSide==='L') pos = [pos[0], -pos[1]];
     if (pos) loads.push({w:g.w, fs:pos[0], bl:pos[1], id:'gear', name:g.n+' – '+(g.loc==='Installed'?'installed':g.loc)});
   }
   return loads;
@@ -837,7 +844,7 @@ function check({r, env, rNoHook, rAft}){
   }
   if (rAft){
     const bad = [...rAft.burn, rAft.zeroFuel].filter(p=>!WB.onOrInside(ENV.long,p.cg,p.w) || !WB.onOrInside(ENV.lat,p.lat,p.w));
-    if (bad.length){ ok=false; msgs.push('With passengers and cargo off-loaded (pilot and gear only), CG would be outside limits — check the drop-off sequence.'); }
+    if (bad.length){ warn=true; msgs.push('Drop-off check: if all passengers and cargo were off-loaded (pilot and gear only), CG would be outside limits. Plan the drop-off sequence so the aircraft stays within limits at each stop.'); }
   }
   const cl = T.cargoLimits;
   if (cl){
@@ -910,7 +917,7 @@ function cgWithin(c){
   const ins = (p,lo,la) => WB.onOrInside(lo,p.cg,p.w) && WB.onOrInside(la,p.lat,p.w);
   let ok = r.takeoff.w <= env.maxW && [...r.burn, r.zeroFuel].every(p=>ins(p,env.long,env.lat));
   if (rNoHook) ok = ok && ins(rNoHook.takeoff, ENV.long, ENV.lat);
-  if (rAft) ok = ok && [...rAft.burn, rAft.zeroFuel].every(p=>ins(p,ENV.long,ENV.lat));
+  // 412 drop-off check (pax & cargo off-loaded) is advisory: shown as a note, not as OUTSIDE LIMITS
   return ok;
 }
 // Forward/aft limits of an envelope at a weight
