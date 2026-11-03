@@ -172,8 +172,8 @@ details summary{cursor:pointer;font-size:13px;color:var(--accent);margin-top:4px
 .calcbar{display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin-bottom:12px}
 .calcbar input{font:inherit;font-size:16px;padding:7px 10px;border:1px solid var(--line);border-radius:8px}
 .btn{font:inherit;font-size:15px;padding:9px 14px;border-radius:9px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;min-height:40px}
-nav.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;order:10;flex-basis:100%;margin:2px 0 0}
-nav.tabs button{font:inherit;font-size:16px;font-weight:500;border:1.5px solid var(--line);border-radius:8px;background:none;color:var(--muted);cursor:pointer;min-height:40px}
+nav.tabs{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;order:10;flex-basis:100%;margin:2px 0 0}
+nav.tabs button{font:inherit;font-size:15px;line-height:1.15;padding:4px 6px;font-weight:500;border:1.5px solid var(--line);border-radius:8px;background:none;color:var(--muted);cursor:pointer;min-height:40px}
 nav.tabs button[aria-selected=true]{background:#1f5fbf;border-color:#0d356f;color:#fff;font-weight:700}
 #tabCalc{max-width:1100px;margin:0 auto;padding:14px}
 .sumcol{display:grid;gap:14px;max-width:1100px}
@@ -209,6 +209,7 @@ label.f.big input{font-size:24px;font-weight:600}
 .midcol .pside > span{display:block;margin-bottom:6px}
 .midcol .pside .seg.two{grid-template-columns:1fr 1fr}
 .mfd{min-width:0}
+@media (max-width:640px){nav.tabs{grid-template-columns:repeat(3,1fr)}}
 .fuelrow{display:flex;gap:8px;align-items:flex-end}.fuelrow label.f.big{white-space:nowrap}.fuelrow label{flex:1;min-width:0}.fuelrow input{width:100%;min-width:0;box-sizing:border-box}
 .fillmax{font-weight:700;white-space:nowrap;min-height:50px;padding:0 14px}
 .fillnote{color:var(--accent);font-weight:600}
@@ -235,7 +236,7 @@ label.f.big input{font-size:24px;font-weight:600}
   <span class="pill okp" id="srcPill"></span>
   <span class="spacer"></span>
   <span class="pill" id="envPill">Envelope: FMS-11 internal 7,500 lb</span>
-  <nav class="tabs" role="tablist"><button role="tab" id="tbLoad" aria-selected="true">Load Sheet</button><button role="tab" id="tbSum" aria-selected="false">Summary Sheet</button><button role="tab" id="tbCalc" aria-selected="false">Calculation Sheet</button></nav>
+  <nav class="tabs" role="tablist"><button role="tab" id="tbLoad" aria-selected="true">Load Sheet</button><button role="tab" id="tbAdd" aria-selected="false">Addendums</button><button role="tab" id="tbTemp" aria-selected="false">Temp Changes</button><button role="tab" id="tbGear" aria-selected="false">Operational Gear</button><button role="tab" id="tbSum" aria-selected="false">Summary Sheet</button><button role="tab" id="tbCalc" aria-selected="false">Calculation Sheet</button></nav>
 </header>
 <main id="tabLoad" class="loadgrid">
   <section class="card diagram" id="diagCard">
@@ -267,6 +268,38 @@ label.f.big input{font-size:24px;font-weight:600}
     </section>
   </div>
 </main>
+<main id="tabAdd" class="sumcol" hidden>
+    <section class="card">
+      <h2>Addendums in effect</h2>
+      <div class="chips" id="addChips"></div>
+      <div class="fieldnote" id="fieldNote"></div>
+      <div class="note">Blue = maintenance configuration from the workbook. Orange = field change made on this iPad. Record field changes in the journey log.</div>
+      <button class="chip" id="resetBtn" style="margin-top:8px;display:none">Reset to maintenance configuration</button>
+    </section>
+</main>
+<main id="tabTemp" class="sumcol" hidden>
+    <section class="card">
+      <h2>Temporary W&amp;B</h2>
+      <div class="sub2">Temporary changes</div>
+      <div id="tempList"></div>
+      <div class="ttwrap"><table class="ttable" id="tempTable"><colgroup><col style="width:128px"><col><col style="width:72px"><col style="width:72px"><col style="width:92px"><col style="width:64px"><col style="width:84px"><col style="width:40px"></colgroup>
+        <thead><tr><th rowspan="2">Date</th><th rowspan="2">Temporary change</th><th rowspan="2">Weight</th><th colspan="2">Longitudinal</th><th colspan="2">Lateral</th><th rowspan="2"><span class="sr">Delete</span></th></tr>
+        <tr><th>Arm</th><th>Moment</th><th>Arm</th><th>Moment</th></tr></thead>
+        <tbody id="tempBody"></tbody>
+        <tfoot><tr><td colspan="2" class="nettl">Net change from temporary changes</td><td id="tnW">0.00</td><td></td><td id="tnM">0.00</td><td></td><td id="tnL">0.00</td><td></td></tr></tfoot>
+      </table></div>
+      <button class="chip" id="addTemp" style="margin-top:8px">+ Add entry</button>
+      <div id="treWrap"><div class="sub2" style="margin-top:12px">Temporary role equipment (ASD-P7-08)</div>
+      <div id="treList"></div></div>
+      <div class="note">A temporary amendment is in effect only while the equipment is installed. Each needs a journey log entry referencing it.</div>
+    </section>
+</main>
+<main id="tabGear" class="sumcol" hidden>
+    <section class="card">
+      <h2>Operational gear</h2>
+      <div class="gear" id="gear"></div>
+    </section>
+</main>
 <main id="tabSum" class="sumcol" hidden>
     <section class="card">
       <div id="statusBox" class="status ok">Within limits</div>
@@ -296,32 +329,6 @@ label.f.big input{font-size:24px;font-weight:600}
         <div><svg id="chartT" viewBox="0 0 300 330" role="img" aria-label="Lateral CG envelope"></svg></div>
       </div>
       <div class="legend"><span><span style="color:#d0202a">■</span> takeoff (full fuel)</span><span><span style="color:#21b14b">■</span> zero fuel</span><span>○ landing (if entered)</span><span style="color:#3a8fa0">— fuel burn</span><span id="legA1" style="color:var(--warn)">▲ Area ①: no over-water ops with floats</span><span id="legAft">⋯ pilot only, pax &amp; cargo off-loaded</span></div>
-    </section>
-    <section class="card">
-      <h2>Addendums in effect</h2>
-      <div class="chips" id="addChips"></div>
-      <div class="fieldnote" id="fieldNote"></div>
-      <div class="note">Blue = maintenance configuration from the workbook. Orange = field change made on this iPad. Record field changes in the journey log.</div>
-      <button class="chip" id="resetBtn" style="margin-top:8px;display:none">Reset to maintenance configuration</button>
-    </section>
-    <section class="card">
-      <h2>Temporary W&amp;B</h2>
-      <div class="sub2">Temporary changes</div>
-      <div id="tempList"></div>
-      <div class="ttwrap"><table class="ttable" id="tempTable"><colgroup><col style="width:128px"><col><col style="width:72px"><col style="width:72px"><col style="width:92px"><col style="width:64px"><col style="width:84px"><col style="width:40px"></colgroup>
-        <thead><tr><th rowspan="2">Date</th><th rowspan="2">Temporary change</th><th rowspan="2">Weight</th><th colspan="2">Longitudinal</th><th colspan="2">Lateral</th><th rowspan="2"><span class="sr">Delete</span></th></tr>
-        <tr><th>Arm</th><th>Moment</th><th>Arm</th><th>Moment</th></tr></thead>
-        <tbody id="tempBody"></tbody>
-        <tfoot><tr><td colspan="2" class="nettl">Net change from temporary changes</td><td id="tnW">0.00</td><td></td><td id="tnM">0.00</td><td></td><td id="tnL">0.00</td><td></td></tr></tfoot>
-      </table></div>
-      <button class="chip" id="addTemp" style="margin-top:8px">+ Add entry</button>
-      <div id="treWrap"><div class="sub2" style="margin-top:12px">Temporary role equipment (ASD-P7-08)</div>
-      <div id="treList"></div></div>
-      <div class="note">A temporary amendment is in effect only while the equipment is installed. Each needs a journey log entry referencing it.</div>
-    </section>
-    <section class="card">
-      <h2>Operational gear</h2>
-      <div class="gear" id="gear"></div>
     </section>
     <section class="card">
       <h2>Empty weight build-up</h2>
@@ -361,8 +368,9 @@ label.f.big input{font-size:24px;font-weight:600}
 
 <script>
 // ---------- Version (raise by 0.01 for every implemented change) ----------
-const APP_VERSION = '0.21';
+const APP_VERSION = '0.22';
 const CHANGELOG = [
+  ['0.22', '3-Nov-2026', 'Six tabs: Load Sheet, Addendums, Temp Changes, Operational Gear, Summary Sheet, Calculation Sheet. 429 fwd-row floor cargo arm FS 187.6 (midway between the seat rails, FS 179.6 and 195.6).'],
   ['0.21', '3-Nov-2026', 'Fill Max button: most fuel (up to full tanks) that keeps weight and CG within limits from takeoff to zero fuel, with the limiting factor shown. 429: floor-cargo field in place of removed passenger seats (adjacent removed seats share one field); cabin floor cargo limited to 1,200 lb forward of FS 238 and baggage compartment to 540 lb aft of FS 238 (RFM 1-5-C).'],
   ['0.20', '3-Nov-2026', 'Full tanks (1,475 lb on the 429) no longer flagged as exceeding tank capacity; launch splash screen; 429 blade tips stay white in dark mode.'],
   ['0.19', '1-Nov-2026', 'Synced with the iPad app: renamed CCG W&B with icon; three tabs (Load / Summary / Calculation) with filled tab buttons; Load Sheet = drawing + aircraft-display panel (status, gross weight, LON/LAT, balance bar, position weights) + fuel and hover exit, portrait and landscape layouts; Summary Sheet holds everything else; OUTSIDE LIMITS only for CG/weight, CHECK NOTES for other issues; balance bar uses the limits at each weight; TRE needs confirmation; 412 CARGO AFT L/R inboard; door names without FS; cyan windows; dark mode.'],
@@ -542,7 +550,7 @@ const T429 = {
     ['Winter body & blade covers',53,'Not on board'],['Windshield & tailboom cover',22,'Not on board']],
   example:{w:{pilot:200, copilot:220, bm:250}, gear:{pilot:g4(1,1,0,0), copilot:g4(1,1,0,0), al:g4(1,0,1,1), ac:g4(1,0,1,1), ar:g4(1,0,1,1)}, fuel:1400},
   // Cargo strapped to the floor where passenger seats are removed (RFM 1-5-C). Adjacent removed seats in a row share one cargo field.
-  seatCargo:{rows:[{key:'F', label:'fwd row', fs:186, seats:[['fl',-18],['fc',0],['fr',18]]}, {key:'A', label:'aft row', fs:229, seats:[['al',-18],['ac',0],['ar',18]]}],
+  seatCargo:{rows:[{key:'F', label:'fwd row', fs:187.6, seats:[['fl',-18],['fc',0],['fr',18]]}, {key:'A', label:'aft row', fs:229, seats:[['al',-18],['ac',0],['ar',18]]}],
     blocked(){ return S.tre.includes('TRE-431-90-5-A') ? ['fl'] : []; }},   // Cineflex console occupies the fwd L/H seat position
   cargoLimits:{cabin:1200, cabinAftFS:238, bag:540, psf:55, ref:'RFM 1-5-C'},
   fuelTable(tail){ return FLEETS['Bell 429'].fuelTable.filter(x => has('L') || x.w <= 1474.92); },
@@ -1068,11 +1076,11 @@ function calcText(){
 $('copyCalc').onclick = async () => { try { await navigator.clipboard.writeText(calcText()); $('copyMsg').textContent='Copied.'; } catch(e){ $('copyMsg').textContent='Copy not allowed here.'; } };
 $('pic').oninput = () => render();
 function showTab(name){
-  const tabs = {load:['tabLoad','tbLoad'], sum:['tabSum','tbSum'], calc:['tabCalc','tbCalc']};
+  const tabs = {load:['tabLoad','tbLoad'], add:['tabAdd','tbAdd'], temp:['tabTemp','tbTemp'], gear:['tabGear','tbGear'], sum:['tabSum','tbSum'], calc:['tabCalc','tbCalc']};
   for (const [k,[sec,btn]] of Object.entries(tabs)){ $(sec).hidden = k!==name; $(btn).setAttribute('aria-selected', k===name); }
   window.scrollTo(0,0); layoutDiagram();
 }
-$('tbLoad').onclick = () => showTab('load'); $('tbSum').onclick = () => showTab('sum'); $('tbCalc').onclick = () => showTab('calc');
+for (const [b,t] of [['tbLoad','load'],['tbAdd','add'],['tbTemp','temp'],['tbGear','gear'],['tbSum','sum'],['tbCalc','calc']]) $(b).onclick = () => showTab(t);
 $('mfd').onclick = () => showTab('sum');
 function drawTemp(){
   $('tempList').innerHTML = TAIL.tempChanges.length
