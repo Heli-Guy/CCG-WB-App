@@ -92,7 +92,8 @@ th{font-size:12px;color:var(--muted);font-weight:600}
 .seg label:first-child:has(input:checked){background:var(--nob);color:var(--notx)}
 .seg label:has(input:focus-visible){outline:2px solid #1f5fbf;outline-offset:-3px}
 .seg.two{grid-template-columns:repeat(2,86px)}
-.seg label:nth-child(n+5){border-top:1px solid var(--line)}.seg label:nth-child(5){border-left:none}
+.seg.eight{grid-template-columns:repeat(8,86px)}
+@media (max-width:1100px){.gear.many{grid-template-columns:1fr auto}.gear.many .seg{grid-column:1/-1;margin-bottom:8px}.seg.eight{grid-template-columns:repeat(8,minmax(0,1fr))}.gear.many .seg label{padding:0 2px}}
 .pside{display:flex;align-items:center;gap:10px;margin:-2px 0 10px;font-size:13px;font-weight:600}
 .pside .seg.two{grid-template-columns:repeat(2,124px)}
 .pside .seg label:first-child:has(input:checked){background:#1f5fbf;color:#fff}
@@ -369,8 +370,9 @@ label.f.big input{font-size:24px;font-weight:600}
 
 <script>
 // ---------- Version (raise by 0.01 for every implemented change) ----------
-const APP_VERSION = '0.25';
+const APP_VERSION = '0.26';
 const CHANGELOG = [
+  ['0.26', '3-Nov-2026', '412 operational gear: the eight location buttons in one row (in portrait, under the item name).'],
   ['0.25', '3-Nov-2026', '412: attendant seat shown on the Load Sheet with addendum Y (water sampling hoist, ASD-P7-06) as well as with the litter kit. 412 drop-off check (passengers and cargo off-loaded) is now a note (WITHIN LIMITS · NOTES) instead of OUTSIDE LIMITS.'],
   ['0.24', '3-Nov-2026', '412 operational gear can also be stowed at the pilot station (FS 47, BL +22), co-pilot station (FS 47, BL −22), 4-man seat (FS 85.7, BL 0) or 5-man seat (FS 114.7, BL 0); pilot/co-pilot follow the pilot seat selection.'],
   ['0.23', '3-Nov-2026', '429 aft-row floor cargo arm FS 226 (midway between the seat rails, FS 218 and 234).'],
@@ -1166,11 +1168,11 @@ function drawEW(r){
 }
 
 function drawGear(){
-  const box = $('gear'); box.innerHTML='';
+  const box = $('gear'); box.innerHTML=''; box.classList.toggle('many', T.gearOpts.length>4);
   GEARLIST.forEach((g,i)=>{
     const n=document.createElement('div'); n.textContent=g.n;
     const w=document.createElement('div'); w.textContent=g.w+' lb'; w.style.color='var(--muted)';
-    const s=document.createElement('div'); s.className='seg'+(g.inst?' two':''); s.setAttribute('role','radiogroup'); s.setAttribute('aria-label',g.n+' location');
+    const s=document.createElement('div'); s.className='seg'+(g.inst?' two':(T.gearOpts.length===8?' eight':'')); s.setAttribute('role','radiogroup'); s.setAttribute('aria-label',g.n+' location');
     const opts = g.inst ? [['Not on board','Not on board'],['Installed','Installed']] : T.gearOpts;
     for (const [o,lab] of opts){ const l=document.createElement('label'); const r=document.createElement('input'); r.type='radio'; r.name='g'+i; r.checked=o===g.loc;
       r.onchange=()=>{ g.loc=o; render(); }; l.append(r,document.createTextNode(lab)); s.appendChild(l); }
