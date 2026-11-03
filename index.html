@@ -370,8 +370,10 @@ label.f.big input{font-size:24px;font-weight:600}
 
 <script>
 // ---------- Version (raise by 0.01 for every implemented change) ----------
-const APP_VERSION = '0.26';
+const APP_VERSION = '0.28';
 const CHANGELOG = [
+  ['0.28', '3-Nov-2026', '429 with aux fuel tank (addendum L): ON AUX TANK baggage box (FS 259.5, BL −9.7 — aux tank CG from addendum L), limited to 125 lb (RFM 5-6); counts toward the 540 lb baggage compartment limit.'],
+  ['0.27', '3-Nov-2026', 'Web: build date and time shown next to the version in the top banner, and the version in the browser tab title.'],
   ['0.26', '3-Nov-2026', '412 operational gear: the eight location buttons in one row (in portrait, under the item name).'],
   ['0.25', '3-Nov-2026', '412: attendant seat shown on the Load Sheet with addendum Y (water sampling hoist, ASD-P7-06) as well as with the litter kit. 412 drop-off check (passengers and cargo off-loaded) is now a note (WITHIN LIMITS · NOTES) instead of OUTSIDE LIMITS.'],
   ['0.24', '3-Nov-2026', '412 operational gear can also be stowed at the pilot station (FS 47, BL +22), co-pilot station (FS 47, BL −22), 4-man seat (FS 85.7, BL 0) or 5-man seat (FS 114.7, BL 0); pilot/co-pilot follow the pilot seat selection.'],
@@ -531,6 +533,7 @@ const T429 = {
     {id:'bf', name:'Forward baggage', short:'BAG F', fs:249, bl:0, kind:'cargo', dy:-13},
     {id:'bm', name:'Mid baggage', short:'BAG M', fs:260, bl:0, kind:'cargo'},
     {id:'br', name:'Rear baggage', short:'BAG R', fs:271, bl:0, kind:'cargo', dy:13},
+    {id:'bagAux', name:'Baggage on aux fuel tank (addendum L, max 125 lb)', short:'ON AUX TANK', fs:259.5, bl:-9.7, kind:'cargo', dx:-58, bw:96},   // arm = aux tank CG from addendum L (14,617.64 / 56.33)
     {id:'skidL', name:'Hover exit – left skid', short:'SKID L', bl:-52, kind:'hover'},
     {id:'skidR', name:'Hover exit – right skid', short:'SKID R', bl:52, kind:'hover'}
   ],
@@ -544,6 +547,7 @@ const T429 = {
       case 'ac': return (!has('O') && !has('E')) ? st : null;
       case 'ar': return has('O') ? {...st, id:'litter', name:'Litter patient (addendum O)', short:'LITTER', fs:220, bl:15, noCover:true, dy:14} : !has('F') ? st : null;
       case 'hook': return has('M') ? null : st;
+      case 'bagAux': return has('L') ? st : null;
       default: return st;
     }
   },
@@ -558,7 +562,7 @@ const T429 = {
   // Cargo strapped to the floor where passenger seats are removed (RFM 1-5-C). Adjacent removed seats in a row share one cargo field.
   seatCargo:{rows:[{key:'F', label:'fwd row', fs:187.6, seats:[['fl',-18],['fc',0],['fr',18]]}, {key:'A', label:'aft row', fs:226, seats:[['al',-18],['ac',0],['ar',18]]}],
     blocked(){ return S.tre.includes('TRE-431-90-5-A') ? ['fl'] : []; }},   // Cineflex console occupies the fwd L/H seat position
-  cargoLimits:{cabin:1200, cabinAftFS:238, bag:540, psf:55, ref:'RFM 1-5-C'},
+  cargoLimits:{cabin:1200, cabinAftFS:238, bag:540, auxTank:125, psf:55, ref:'RFM 1-5-C', auxRef:'RFM 5-6'},
   fuelTable(tail){ return FLEETS['Bell 429'].fuelTable.filter(x => has('L') || x.w <= 1474.92); },
   auxText(){ return has('L') ? 'including aux tank (addendum L)' : 'main tanks, no aux tank'; }
 };
@@ -852,6 +856,8 @@ function check({r, env, rNoHook, rAft}){
   if (cl){
     const cab = cabinCargo(), bag = bagCargo();
     if (cab > cl.cabin){ ok=false; msgs.push(`Cabin floor cargo ${fmt(cab,0)} lb exceeds the ${fmt(cl.cabin,0)} lb limit forward of FS ${cl.cabinAftFS} (${cl.ref}).`); }
+    const onAux = activeStations().some(s=>s.id==='bagAux') ? (S.w.bagAux||0) : 0;
+    if (cl.auxTank && onAux > cl.auxTank){ ok=false; msgs.push(`Baggage on the aux fuel tank ${fmt(onAux,0)} lb exceeds the ${fmt(cl.auxTank,0)} lb limit (${cl.auxRef}).`); }
     if (bag > cl.bag){ ok=false; msgs.push(`Baggage compartment load ${fmt(bag,0)} lb (including gear stowed there) exceeds the ${fmt(cl.bag,0)} lb limit aft of FS ${cl.cabinAftFS} (${cl.ref}).`); }
   }
   const floats = !has(T.floatsLetter) && !!ENV.area1;
@@ -1281,7 +1287,8 @@ function applyTail(typeChanged){
 sel.onchange = () => { applyTail(loadTail(sel.value)); };
 for (const r of document.querySelectorAll('input[name=pside]')) r.onchange = () => { S.pilotSide = r.value; render(); };
 applyTail(true);
-$('verTag').textContent = 'v' + APP_VERSION;
+$('verTag').textContent = 'v' + APP_VERSION + ' · built 3-Nov-2026 11:50';
+document.title = 'CCG W&B v' + APP_VERSION;
 </script>
 </body>
 </html>
