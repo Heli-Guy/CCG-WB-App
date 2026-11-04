@@ -225,6 +225,78 @@ label.f.big input{font-size:24px;font-weight:600}
 }
 #splash.hide{opacity:0;pointer-events:none}
 #splash span{background:rgba(0,0,0,.45);color:#fff;font:700 32px -apple-system,system-ui,sans-serif;padding:10px 28px;border-radius:12px;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+
+#printView{display:none}
+.exportbtn{min-height:40px;font-weight:600}
+@media print{
+ @page{size:letter;margin:9mm}
+ :root{--bg:#f3f4f6;--card:#fff;--ink:#16191d;--muted:#5b6470;--line:#d9dde3;--accent:#1f5fbf;--ok:#1b7f3b;--warn:#b25e00;--bad:#c0262d;--field:#b25e00;
+ --subtle:#fafbfc;--key:#f7f8fa;--chipon:#e8eef9;--chiponb:#7fa3e0;--chipontx:#163f80;--fieldbg:#fff4e5;--fieldtx:#7a4100;--okbg:#e3f3e8;--oktx:#145c2b;--badbg:#fde8e9;--badtx:#8f1a20;
+ --nob:#f8d7d9;--notx:#8f1a20;--grid:#eceef1;--sec:#3b434d;--tthead:#f6a35c;--ttcell:#fdeee2;--ttborder:#c97b35;--ttline:#e3c7ae;--ph:#9aa2ad;color-scheme:light}
+ html,body{background:#fff!important}
+ body>*:not(#printView){display:none!important}
+ #printView{display:block;color:#16191d;font-size:9.5px;line-height:1.3}
+ *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+.pv-page{break-after:page;page-break-after:always}
+.pv-page:last-child{break-after:auto;page-break-after:auto}
+.pv-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #16191d;padding-bottom:3px;margin-bottom:5px}
+.pv-head b{font-size:14px}
+.pv-head span{font-size:9px;color:#5b6470}
+.pv-status{font-weight:800;font-size:12px;padding:4px 8px;border-radius:5px;margin-bottom:3px}
+.pv-status.ok{background:#e3f3e8;color:#145c2b}.pv-status.warn{background:#fff4e5;color:#7a4100}.pv-status.check,.pv-status.out{background:#fde8e9;color:#8f1a20}
+.pv-msgs{margin:0 0 5px 16px;padding:0}
+.pv-row{display:grid;gap:8px;margin-bottom:6px;align-items:start}
+.pv-row1{grid-template-columns:auto 1fr}
+.pv-diag{position:relative;overflow:hidden;border:1px solid #d9dde3;border-radius:6px}
+.pv-diag img{width:100%;height:auto;display:block;opacity:.8;position:relative;z-index:1}
+.pv-diag svg{position:absolute;inset:0;width:100%;height:auto}
+.pv-diag svg.pv-under{z-index:0}.pv-diag svg.pv-st{z-index:2}
+.pv-right{display:grid;gap:6px}
+.pv-top{display:grid;grid-template-columns:200px 1fr;gap:8px;align-items:start}
+.pv-mfd{background:#1c1c1f;color:#fff;border-radius:8px;padding:8px;font-size:10px}
+.pv-mfd .mfdstatus{font-size:11px;padding:3px;margin-bottom:5px}
+.pv-mfd .mfdrow,.pv-mfd .durow{font-size:12px}
+.pv-mfd .durow .v{font-size:16px}.pv-mfd .durow .k{font-size:11px}
+.pv-mfd .mfdsep{margin:5px 0}
+.pv-box{border:1px solid #d9dde3;border-radius:6px;padding:5px 7px}
+.pv-box h4{margin:0 0 3px;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:#3b434d}
+.pv-kv{display:grid;grid-template-columns:auto 1fr;gap:1px 8px}
+.pv-kv div:nth-child(odd){color:#5b6470}
+.pv-box table{width:100%;border-collapse:collapse;font-size:9px}
+.pv-box td,.pv-box th{padding:1px 3px;border-bottom:1px solid #eceef1;text-align:right}
+.pv-box td:first-child,.pv-box th:first-child{text-align:left}
+.pv-charts{display:grid;grid-template-columns:1.4fr 1fr;gap:4px}
+.pv-charts svg{width:100%;height:auto}
+.pv-row3{grid-template-columns:1fr 1fr 1fr}
+.pv-list{margin:0;padding-left:12px}
+.pv-legend{font-size:8px;color:#5b6470}
+.pv-calc table{width:100%;border-collapse:collapse;font-size:8.5px}
+.pv-calc td,.pv-calc th{padding:1.5px 4px;border-bottom:1px solid #eceef1;text-align:right}
+.pv-calc td:first-child,.pv-calc th:first-child{text-align:left}
+.pv-calc tr.sec td{background:#f3f4f6;font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:8px}
+.pv-calc tr.tot td{font-weight:700;border-top:1.5px solid #16191d}
+.pv-calc tr.detail td{color:#5b6470}
+.pv-calc .kv{grid-template-columns:150px 1fr;font-size:9px;gap:0 10px}
+#printView .pv-head b{white-space:nowrap;margin-right:10px}
+#printView .pv-mfd{padding:6px 8px}
+#printView .pv-mfd .mfdstatus{font-size:10px!important;padding:2px!important;margin-bottom:4px!important}
+#printView .pv-mfd .mfdrow{font-size:11px!important}
+#printView .pv-mfd .mfdrow .v,#printView .pv-mfd .mfdrow .k{font-size:11px!important}
+#printView .pv-mfd .balbar{height:16px!important;margin-top:3px!important}
+#printView .pv-mfd .ballbl{font-size:8px!important;margin-top:1px!important}
+#printView .pv-mfd .durow{padding:0!important}
+#printView .pv-mfd .durow .k{font-size:10px!important}
+#printView .pv-mfd .durow .s{font-size:7px!important}
+#printView .pv-mfd .durow .v{font-size:13px!important}
+#printView .pv-charts{max-width:420px}
+#printView table{width:100%;border-collapse:collapse}
+#printView td,#printView th{font-size:8.5px!important;line-height:1.25;padding:1px 3px!important;border-bottom:1px solid #eceef1;text-align:right;font-weight:inherit}
+#printView th{color:#5b6470;font-weight:600}
+#printView td:first-child,#printView th:first-child{text-align:left}
+#printView .pv-calc td,#printView .pv-calc th{font-size:8px!important;padding:0.5px 4px!important}
+#printView tr.tot td,#printView tr.tot th{font-weight:700}
+
 </style>
 </head>
 <body>
@@ -233,6 +305,7 @@ label.f.big input{font-size:24px;font-weight:600}
 <div class="banner">CCG W&amp;B <b id="verTag"></b> (web prototype) — for layout and calculation review only. Not approved for operational weight &amp; balance.</div>
 <header>
   <label class="tailpick"><span class="sr">Aircraft</span><select id="tailSel" aria-label="Aircraft"></select></label>
+  <button type="button" class="btn exportbtn" id="exportBtn" title="Save or print the load sheet as a PDF">Export PDF</button>
   <span class="pill" id="typePill"></span>
   <span class="pill" id="amdPill"></span>
   <span class="pill okp" id="srcPill"></span>
@@ -356,6 +429,8 @@ label.f.big input{font-size:24px;font-weight:600}
   </div>
 </section>
 
+<div id="printView" aria-hidden="true"></div>
+
 <div class="sheet" id="sheet">
   <div class="pop" role="dialog" aria-modal="true" aria-labelledby="popTitle">
     <h3 id="popTitle">Station</h3>
@@ -370,8 +445,9 @@ label.f.big input{font-size:24px;font-weight:600}
 
 <script>
 // ---------- Version (raise by 0.01 for every implemented change) ----------
-const APP_VERSION = '0.28';
+const APP_VERSION = '0.29';
 const CHANGELOG = [
+  ['0.29', '4-Nov-2026', 'Export PDF button next to the aircraft selector: page 1 = load sheet (diagram, display panel, fuel, results, CG envelopes, empty weight build-up, addendums, temporary changes, operational gear); page 2 = calculation sheet.'],
   ['0.28', '3-Nov-2026', '429 with aux fuel tank (addendum L): ON AUX TANK baggage box (FS 259.5, BL −9.7 — aux tank CG from addendum L), limited to 125 lb (RFM 5-6); counts toward the 540 lb baggage compartment limit.'],
   ['0.27', '3-Nov-2026', 'Web: build date and time shown next to the version in the top banner, and the version in the browser tab title.'],
   ['0.26', '3-Nov-2026', '412 operational gear: the eight location buttons in one row (in portrait, under the item name).'],
@@ -1252,6 +1328,77 @@ function fillMax(){
   $('fuel').value = S.fuel; render();
 }
 $('fillMax').onclick = fillMax;
+// ---------- Export PDF (print view: page 1 = load sheet + addendums + temp changes + gear + summary; page 2 = calculation sheet) ----------
+function esc(s){ return String(s).replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+function stamp(d=new Date()){ return `${d.getDate()}-${MON[d.getMonth()]}-${d.getFullYear()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }
+function buildPrintView(){
+  render();
+  const c = calc(), v = check(c), cgOK = cgWithin(c);
+  const stat = v.ok ? (v.warn ? 'warn' : 'ok') : (cgOK ? 'check' : 'out');
+  const statTxt = ({ok:'WITHIN LIMITS — full fuel to zero fuel', warn:'WITHIN LIMITS — see notes', check:'CG within limits — NOT VALID until the notes are resolved', out:'OUTSIDE LIMITS'})[stat];
+  const now = stamp(), pic = $('pic').value || '—';
+  const head = (t) => `<div class="pv-head"><b>CCG W&amp;B — ${t}</b><span>${esc(TAIL.reg)} · ${esc(TAIL.callSign)} · ${esc(TAIL.type)} s/n ${esc(TAIL.serial)} · ${esc(TAIL.report)} Amd ${TAIL.amendment} · PIC ${esc(pic)} · ${now} · v${APP_VERSION} (web prototype — not approved for operational W&amp;B)</span></div>`;
+  // diagram
+  const crop = T.type==='Bell 412' ? 1160 : T.img.h, dw = Math.round(440*520/crop);
+  const under = $('under').cloneNode(true), st = $('diag').cloneNode(true), img = $('diagImg').cloneNode(true);
+  for (const n of [under, st, img]) n.removeAttribute('id');
+  under.setAttribute('class','pv-under'); st.setAttribute('class','pv-st');
+  const diag = `<div class="pv-diag" style="width:${dw}px;aspect-ratio:520/${crop}">${under.outerHTML}${img.outerHTML}${st.outerHTML}</div>`;
+  // MFD panel
+  const mfd = $('mfd').cloneNode(true); mfd.removeAttribute('id'); mfd.querySelectorAll('[id]').forEach(n=>n.removeAttribute('id'));
+  const fuelKV = [['Takeoff fuel', `${fmt(S.fuel,0)} lb (${fmt(S.fuel/6.8,0)} gal)`], ['Landing fuel', `${fmt(S.lfuel,0)} lb`], ['Tanks', `${fmt(fullTail().fuelTable.at(-1).w,0)} lb — ${T.auxText()}`],
+    ['Hover exit door', doorOf().label.replace(/ \(FS.*\)/,'')], ['Envelope', c.env.ext ? T.envName.ext : T.envName.int]];
+  if (T.type==='Bell 412') fuelKV.push(['Pilot seat', S.pilotSide==='L' ? 'Left (longline)' : 'Right (normal)']);
+  const kv = rows => `<div class="pv-kv">${rows.map(([k,x])=>`<div>${k}</div><div>${x}</div>`).join('')}</div>`;
+  const {r} = c;
+  const res = (n,p) => `<tr><td>${n}</td><td>${fmt(p.w)}</td><td>${fmt(p.cg,2)}</td><td>${(p.lat>=0?'+':'')+fmt(p.lat,2)}</td></tr>`;
+  const results = `<table><tr><th></th><th>Weight lb</th><th>Long CG</th><th>Lat CG</th></tr>${res('Empty (as configured)',r.empty)}${res('Zero fuel',r.zeroFuel)}${res('Takeoff',r.takeoff)}${S.lfuel>0?res('Landing',r.landing):''}</table>`;
+  const cl = $('chartL').cloneNode(true), ct = $('chartT').cloneNode(true); cl.removeAttribute('id'); ct.removeAttribute('id');
+  // addendums / temp / gear
+  const fcIds = new Set(fieldChanges().map(x=>x.split(' ')[0]));
+  const adds = TAIL.addendums.filter(a=>has(a.id)).map(a=>`<li><b>${a.id}</b> ${esc(a.desc)}${fcIds.has(a.id)?' <b>(field change)</b>':''}</li>`)
+    .concat(TAIL.addendums.filter(a=>!has(a.id) && TAIL.inEffect.includes(a.id)).map(a=>`<li><b>${a.id}</b> ${esc(a.desc)} <b>(removed in field)</b></li>`));
+  const temps = [...TAIL.tempChanges.map(t=>`${fmtDate(t.date)} ${esc(t.desc)} — ${fmt(t.w,2)} lb @ FS ${t.fs}`),
+    ...S.ptemp.filter(t=>+t.w).map(t=>`${fmtDate(t.date)} ${esc(t.desc||'(no description)')} — ${fmt(+t.w,2)} lb @ FS ${t.fs||0} (pilot entry)`),
+    ...TRES.filter(t=>S.tre.includes(t.id)).map(t=>`${t.id} — ${esc(t.title)} (${t.w>0?'+':''}${fmt(t.w,2)} lb)`)];
+  const gear = GEARLIST.filter(g=>g.loc!=='Not on board');
+  const gearRows = gear.map(g=>`<tr><td>${esc(g.n)}</td><td>${g.w}</td><td>${esc(g.loc)}</td></tr>`).join('');
+  const gearOff = GEARLIST.filter(g=>g.loc==='Not on board').map(g=>esc(g.n)).join(', ');
+  const ew = $('ewTable').innerHTML;
+  const p1 = `<div class="pv-page">${head('Load sheet')}
+    <div class="pv-status ${stat}">${statTxt}</div>${v.msgs.length?`<ul class="pv-msgs">${v.msgs.map(m=>`<li>${m}</li>`).join('')}</ul>`:''}
+    <div class="pv-row pv-row1">${diag}
+      <div class="pv-right">
+        <div class="pv-top"><div class="pv-mfd">${mfd.innerHTML}</div>
+          <div style="display:grid;gap:6px"><div class="pv-box"><h4>Fuel &amp; configuration</h4>${kv(fuelKV)}</div><div class="pv-box"><h4>Results</h4>${results}</div></div></div>
+        <div class="pv-box"><h4>CG envelopes</h4><div class="pv-charts">${cl.outerHTML}${ct.outerHTML}</div>
+          <div class="pv-legend">■ red takeoff · ■ green zero fuel · ○ landing · — fuel burn</div></div>
+        <div class="pv-box"><h4>Empty weight build-up</h4><table>${ew}</table></div>
+      </div>
+    </div>
+    <div class="pv-row pv-row3">
+      <div class="pv-box"><h4>Addendums in effect</h4>${adds.length?`<ul class="pv-list">${adds.join('')}</ul>`:'None'}</div>
+      <div class="pv-box"><h4>Temporary changes</h4>${temps.length?`<ul class="pv-list">${temps.map(t=>`<li>${t}</li>`).join('')}</ul>`:'None'}</div>
+      <div class="pv-box"><h4>Operational gear on board</h4>${gear.length?`<table><tr><th>Item</th><th>lb</th><th>Location</th></tr>${gearRows}</table>`:'None'}${gearOff?`<div class="pv-legend" style="margin-top:2px">Not on board: ${gearOff}</div>`:''}</div>
+    </div></div>`;
+  const p2 = `<div class="pv-page pv-calc">${head('Calculation sheet')}
+    <div class="kv">${$('calcHead').innerHTML}</div>
+    <table style="margin-top:6px"><thead><tr><th>Item</th><th>Weight lb</th><th>Arm in</th><th>Moment in-lb</th><th>Lat arm in</th><th>Lat moment in-lb</th></tr></thead><tbody>${$('calcBody').innerHTML}</tbody></table>
+    <h4 style="margin:8px 0 3px">Limits check</h4><div class="kv">${$('calcCheck').innerHTML}</div></div>`;
+  $('printView').innerHTML = p1 + p2;
+}
+let savedTitle = null;
+function exportPDF(){
+  buildPrintView();
+  const d = new Date(), pad = n=>String(n).padStart(2,'0');
+  savedTitle = document.title;
+  document.title = `W&B ${TAIL.reg} ${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}${pad(d.getMinutes())}`;   // suggested PDF file name
+  window.print();
+}
+window.addEventListener('beforeprint', ()=>{ if (!$('printView').innerHTML) buildPrintView(); });
+window.addEventListener('afterprint', ()=>{ if (savedTitle){ document.title = savedTitle; savedTitle = null; } $('printView').innerHTML=''; });
+$('exportBtn').onclick = exportPDF;
+
 $('fuelSlider').oninput=e=>{ S.fuel=+e.target.value; $('fuel').value=S.fuel; render(); };
 $('lfuel').oninput=e=>{ S.lfuel=Math.max(0,+e.target.value||0); render(); };
 $('door').onchange=e=>{ S.door=e.target.value; render(); };
@@ -1287,7 +1434,7 @@ function applyTail(typeChanged){
 sel.onchange = () => { applyTail(loadTail(sel.value)); };
 for (const r of document.querySelectorAll('input[name=pside]')) r.onchange = () => { S.pilotSide = r.value; render(); };
 applyTail(true);
-$('verTag').textContent = 'v' + APP_VERSION + ' · built 3-Nov-2026 11:50';
+$('verTag').textContent = 'v' + APP_VERSION + ' · built 4-Nov-2026 11:22';
 document.title = 'CCG W&B v' + APP_VERSION;
 </script>
 </body>
