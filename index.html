@@ -101,7 +101,7 @@ details summary{cursor:pointer;font-size:13px;color:var(--accent);margin-top:4px
 .toggle{display:flex;align-items:center;gap:8px;font-size:13px;margin-top:6px}
 .toggle input{width:20px;height:20px}
 /* popover */
-.sheet{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:10}
+.sheet{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:60}
 .sheet.show{display:flex}
 .pop{background:var(--card);border-radius:14px;padding:16px;width:min(360px,92vw);box-shadow:0 10px 40px rgba(0,0,0,.25)}
 .pop h3{margin:0 0 4px;font-size:17px}
@@ -226,6 +226,14 @@ label.f.big input{font-size:24px;font-weight:600}
 #splash.hide{opacity:0;pointer-events:none}
 #splash span{background:rgba(0,0,0,.45);color:#fff;font:700 32px -apple-system,system-ui,sans-serif;padding:10px 28px;border-radius:12px;text-shadow:0 1px 3px rgba(0,0,0,.6)}
 
+.allgear{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.allgear button{font:inherit;font-size:13px;display:flex;align-items:center;gap:6px;justify-content:flex-start;padding:8px;border-radius:9px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;min-height:44px;text-align:left;line-height:1.15}
+.allgear button svg{width:18px;height:18px;flex:none}
+.allgear button svg path{fill:currentColor}
+.allgear button.all{background:#1f5fbf;border-color:#0d356f;color:#fff}
+.allgear button.some{border-color:#1f5fbf;border-style:dashed}
+.allgear button small{display:block;font-size:10.5px;opacity:.75}
+header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
 #printView{display:none}
 .exportbtn{min-height:40px;font-weight:600}
 @media print{
@@ -350,6 +358,11 @@ label.f.big input{font-size:24px;font-weight:600}
       <h2>Hover exit</h2>
       <label class="f">Door open<select id="door"></select></label>
     </section>
+    <section class="card">
+      <h2>Gear — all seats</h2>
+      <div class="allgear" id="allGear"></div>
+      <div class="note">Puts the item on every seat shown on the diagram; tap again to remove it from all. Change a single seat by tapping that seat.</div>
+    </section>
   </div>
 </main>
 <main id="tabAdd" class="sumcol" hidden>
@@ -454,8 +467,10 @@ label.f.big input{font-size:24px;font-weight:600}
 
 <script>
 // ---------- Version (raise by 0.01 for every implemented change) ----------
-const APP_VERSION = '0.30';
+const APP_VERSION = '0.32';
 const CHANGELOG = [
+  ['0.32', '4-Nov-2026', 'Header (aircraft selector, Export PDF and tabs) stays at the top of the screen while scrolling.'],
+  ['0.31', '4-Nov-2026', 'Load Sheet: "Gear — all seats" buttons to put a life jacket, helmet, headset or seat cover on every seat at once (tap again to remove from all).'],
   ['0.30', '4-Nov-2026', 'PDF: display panel printed on a white background.'],
   ['0.29', '4-Nov-2026', 'Export PDF button next to the aircraft selector: page 1 = load sheet (diagram, display panel, fuel, results, CG envelopes, empty weight build-up, addendums, temporary changes, operational gear); page 2 = calculation sheet.'],
   ['0.28', '3-Nov-2026', '429 with aux fuel tank (addendum L): ON AUX TANK baggage box (FS 259.5, BL −9.7 — aux tank CG from addendum L), limited to 125 lb (RFM 5-6); counts toward the 540 lb baggage compartment limit.'],
@@ -1100,7 +1115,7 @@ function render(){
     <div class="c"><div class="k">Addend no(s)</div><div class="v">${S.addendums.join(' ')||'—'}</div></div>
     <div class="c"><div class="k">Arm long / lat in</div><div class="v small">${fmt(r.empty.cg,2)} / ${(r.empty.lat>=0?'+':'')+fmt(r.empty.lat,2)}</div></div>`;
   drawTemp();
-  drawDiagram(); drawChips(); drawEW(r); drawCalc(c, v, du);
+  drawDiagram(); drawAllGear(); drawChips(); drawEW(r); drawCalc(c, v, du);
 }
 
 // Arm for a net-change line (addendum). When the net weight is tiny the "arm" is a meaningless number, so show a note instead.
@@ -1338,6 +1353,28 @@ function fillMax(){
   $('fuel').value = S.fuel; render();
 }
 $('fillMax').onclick = fillMax;
+// ---------- Gear on all seats at once ----------
+const ALLGEAR = [['lifeJacket','Life jacket',ICON.vest],['helmet','Helmet',ICON.helmet],['headset','Headset',ICON.headset],['seatCover','Seat cover',ICON.seat]];
+function seatStations(k){ return activeStations().filter(s=>(s.kind==='crew'||s.kind==='pax') && !(k==='seatCover' && s.noCover)); }
+function drawAllGear(){
+  const box = $('allGear'); if (!box) return; box.innerHTML='';
+  for (const [k,lab,d] of ALLGEAR){
+    const seats = seatStations(k), n = seats.filter(s=>gearOf(s)[k]).length;
+    const b = document.createElement('button'); b.type='button';
+    b.className = n && n===seats.length ? 'all' : n ? 'some' : '';
+    b.setAttribute('aria-pressed', n===seats.length && n>0);
+    b.innerHTML = `<svg viewBox="0 0 12 12" aria-hidden="true"><path d="${d}"/></svg><span>${lab}<small>${n} of ${seats.length} seats</small></span>`;
+    b.onclick = () => {
+      const on = n !== seats.length;   // not on every seat yet → put on all; otherwise remove from all
+      for (const s of seats){ const g = gearOf(s); g[k] = on;
+        if (on && k==='helmet') g.headset = false;
+        if (on && k==='headset') g.helmet = false; }
+      render();
+    };
+    box.appendChild(b);
+  }
+}
+
 // ---------- Export PDF (print view: page 1 = load sheet + addendums + temp changes + gear + summary; page 2 = calculation sheet) ----------
 function esc(s){ return String(s).replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
 function stamp(d=new Date()){ return `${d.getDate()}-${MON[d.getMonth()]}-${d.getFullYear()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }
@@ -1444,7 +1481,7 @@ function applyTail(typeChanged){
 sel.onchange = () => { applyTail(loadTail(sel.value)); };
 for (const r of document.querySelectorAll('input[name=pside]')) r.onchange = () => { S.pilotSide = r.value; render(); };
 applyTail(true);
-$('verTag').textContent = 'v' + APP_VERSION + ' · built 4-Nov-2026 11:44';
+$('verTag').textContent = 'v' + APP_VERSION + ' · built 4-Nov-2026 13:31';
 document.title = 'CCG W&B v' + APP_VERSION;
 </script>
 </body>
