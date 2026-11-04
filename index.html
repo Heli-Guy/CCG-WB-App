@@ -290,6 +290,15 @@ label.f.big input{font-size:24px;font-weight:600}
 #printView .pv-mfd .durow .s{font-size:7px!important}
 #printView .pv-mfd .durow .v{font-size:13px!important}
 #printView .pv-charts{max-width:420px}
+#printView .pv-mfd{background:#fff!important;color:#16191d!important;border:1px solid #d9dde3}
+#printView .pv-mfd .k,#printView .pv-mfd .ballbl,#printView .pv-mfd .durow .k{color:#1d6f86!important}
+#printView .pv-mfd .durow .s{color:#5b6470!important}
+#printView .pv-mfd .mfdsep{border-top-color:#d9dde3!important}
+#printView .pv-mfd .balbar{border:2px solid #16191d!important}
+#printView .pv-mfd .balbar .tick{background:#16191d!important}
+#printView .pv-mfd .balbar .trav:not(.out){background:#4fb3cc!important}
+#printView .pv-mfd .mfdstatus.ok{color:#1b7f3b!important}#printView .pv-mfd .mfdstatus.warn{color:#b25e00!important}
+#printView .pv-mfd .mfdstatus.check{color:#c4560f!important}#printView .pv-mfd .mfdstatus.out{color:#c0262d!important}
 #printView table{width:100%;border-collapse:collapse}
 #printView td,#printView th{font-size:8.5px!important;line-height:1.25;padding:1px 3px!important;border-bottom:1px solid #eceef1;text-align:right;font-weight:inherit}
 #printView th{color:#5b6470;font-weight:600}
@@ -445,8 +454,9 @@ label.f.big input{font-size:24px;font-weight:600}
 
 <script>
 // ---------- Version (raise by 0.01 for every implemented change) ----------
-const APP_VERSION = '0.29';
+const APP_VERSION = '0.30';
 const CHANGELOG = [
+  ['0.30', '4-Nov-2026', 'PDF: display panel printed on a white background.'],
   ['0.29', '4-Nov-2026', 'Export PDF button next to the aircraft selector: page 1 = load sheet (diagram, display panel, fuel, results, CG envelopes, empty weight build-up, addendums, temporary changes, operational gear); page 2 = calculation sheet.'],
   ['0.28', '3-Nov-2026', '429 with aux fuel tank (addendum L): ON AUX TANK baggage box (FS 259.5, BL −9.7 — aux tank CG from addendum L), limited to 125 lb (RFM 5-6); counts toward the 540 lb baggage compartment limit.'],
   ['0.27', '3-Nov-2026', 'Web: build date and time shown next to the version in the top banner, and the version in the browser tab title.'],
@@ -1434,7 +1444,7 @@ function applyTail(typeChanged){
 sel.onchange = () => { applyTail(loadTail(sel.value)); };
 for (const r of document.querySelectorAll('input[name=pside]')) r.onchange = () => { S.pilotSide = r.value; render(); };
 applyTail(true);
-$('verTag').textContent = 'v' + APP_VERSION + ' · built 4-Nov-2026 11:22';
+$('verTag').textContent = 'v' + APP_VERSION + ' · built 4-Nov-2026 11:44';
 document.title = 'CCG W&B v' + APP_VERSION;
 </script>
 </body>
