@@ -467,8 +467,9 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
 
 <script>
 // ---------- Version (raise by 0.01 for every implemented change) ----------
-const APP_VERSION = '0.32';
+const APP_VERSION = '0.33';
 const CHANGELOG = [
+  ['0.33', '6-Nov-2026', '429 operational gear can also be stowed at the pilot station (FS 147, BL +16.4), co-pilot station (FS 147, BL −15.4), mid passenger floor (FS 187.6) or aft passenger floor (FS 229); gear in the cabin counts toward the 1,200 lb cabin floor cargo limit.'],
   ['0.32', '4-Nov-2026', 'Header (aircraft selector, Export PDF and tabs) stays at the top of the screen while scrolling.'],
   ['0.31', '4-Nov-2026', 'Load Sheet: "Gear — all seats" buttons to put a life jacket, helmet, headset or seat cover on every seat at once (tap again to remove from all).'],
   ['0.30', '4-Nov-2026', 'PDF: display panel printed on a white background.'],
@@ -652,8 +653,8 @@ const T429 = {
       default: return st;
     }
   },
-  gearOpts:[['Not on board','Not on board'],['Fwd baggage','Fwd bag'],['Mid baggage','Mid bag'],['Rear baggage','Rear bag']],
-  locs:{'Fwd baggage':[249,0],'Mid baggage':[260,0],'Rear baggage':[271,0]},
+  gearOpts:[['Not on board','Not on board'],['Pilot station','Pilot'],['Co-pilot station','Co-pilot'],['Mid passenger','Mid pax'],['Aft passenger','Aft pax'],['Fwd baggage','Fwd bag'],['Mid baggage','Mid bag'],['Rear baggage','Rear bag']],
+  locs:{'Pilot station':[147,16.4],'Co-pilot station':[147,-15.4],'Mid passenger':[187.6,0],'Aft passenger':[229,0],'Fwd baggage':[249,0],'Mid baggage':[260,0],'Rear baggage':[271,0]},
   gear:[['Axe / saw',4,'Mid baggage'],['Step ladder',24,'Not on board'],['Fuel pump kit',54,'Not on board'],['Gun and ammunition',12,'Not on board'],
     ['Sat phone',5,'Mid baggage'],['Snowshoes (2 pairs)',11,'Not on board'],['Crew barrier',2,'Installed',[168,0]],['Barry cabin net',17,'Not on board'],
     ['Barry cargo net',8,'Mid baggage'],['Misc tie-down kits',6,'Rear baggage'],['Servicing & tool kit',21,'Mid baggage'],['Sleeping bags (3)',15,'Not on board'],
@@ -922,7 +923,9 @@ function calc(){
   const rAft = T.type==='Bell 412' ? WB.compute(fullTail(), {...st, loads: buildLoads({mostAft:true})}) : null;
   return {r, env, rNoHook, hook, loads, rAft};
 }
-function cabinCargo(){ const cl=T.cargoLimits; return activeStations().filter(s=>s.kind==='cargo' && s.fs<cl.cabinAftFS).reduce((a,s)=>a+(S.w[s.id]||0),0); }
+function cabinCargo(){ const cl=T.cargoLimits;   // floor cargo stations + operational gear stowed in the cabin, forward of FS 238
+  return activeStations().filter(s=>s.kind==='cargo' && s.fs<cl.cabinAftFS).reduce((a,s)=>a+(S.w[s.id]||0),0)
+    + GEARLIST.filter(g=>LOCS[g.loc] && LOCS[g.loc][0]<cl.cabinAftFS).reduce((a,g)=>a+g.w,0); }
 function bagCargo(){ const cl=T.cargoLimits;
   return activeStations().filter(s=>s.kind==='cargo' && s.fs>=cl.cabinAftFS).reduce((a,s)=>a+(S.w[s.id]||0),0)
     + GEARLIST.filter(g=>LOCS[g.loc] && LOCS[g.loc][0]>=cl.cabinAftFS).reduce((a,g)=>a+g.w,0); }
@@ -956,7 +959,7 @@ function check({r, env, rNoHook, rAft}){
   const cl = T.cargoLimits;
   if (cl){
     const cab = cabinCargo(), bag = bagCargo();
-    if (cab > cl.cabin){ ok=false; msgs.push(`Cabin floor cargo ${fmt(cab,0)} lb exceeds the ${fmt(cl.cabin,0)} lb limit forward of FS ${cl.cabinAftFS} (${cl.ref}).`); }
+    if (cab > cl.cabin){ ok=false; msgs.push(`Cabin floor cargo ${fmt(cab,0)} lb (including gear stowed in the cabin) exceeds the ${fmt(cl.cabin,0)} lb limit forward of FS ${cl.cabinAftFS} (${cl.ref}).`); }
     const onAux = activeStations().some(s=>s.id==='bagAux') ? (S.w.bagAux||0) : 0;
     if (cl.auxTank && onAux > cl.auxTank){ ok=false; msgs.push(`Baggage on the aux fuel tank ${fmt(onAux,0)} lb exceeds the ${fmt(cl.auxTank,0)} lb limit (${cl.auxRef}).`); }
     if (bag > cl.bag){ ok=false; msgs.push(`Baggage compartment load ${fmt(bag,0)} lb (including gear stowed there) exceeds the ${fmt(cl.bag,0)} lb limit aft of FS ${cl.cabinAftFS} (${cl.ref}).`); }
@@ -1481,7 +1484,7 @@ function applyTail(typeChanged){
 sel.onchange = () => { applyTail(loadTail(sel.value)); };
 for (const r of document.querySelectorAll('input[name=pside]')) r.onchange = () => { S.pilotSide = r.value; render(); };
 applyTail(true);
-$('verTag').textContent = 'v' + APP_VERSION + ' · built 4-Nov-2026 13:31';
+$('verTag').textContent = 'v' + APP_VERSION + ' · built 6-Nov-2026 13:33';
 document.title = 'CCG W&B v' + APP_VERSION;
 </script>
 </body>
