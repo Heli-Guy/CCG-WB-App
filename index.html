@@ -410,6 +410,8 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
       <div class="note">Blue = maintenance configuration from the workbook. Orange = field change made on this iPad. Record field changes in the journey log.</div>
       <button class="chip" id="resetBtn" style="margin-top:8px;display:none">Reset to maintenance configuration</button>
     </section>
+    <p style="text-align:center;margin:4px 0 18px"><button type="button" class="btn" id="resetLoadBtn">Reset Load Sheet to EFB Default</button></p>
+    <p class="note" style="text-align:center;margin-top:-10px">Each aircraft keeps its own load sheet in this browser until it is reset.</p>
 </main>
 <main id="tabTemp" class="sumcol" hidden>
     <section class="card">
@@ -468,8 +470,6 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
       <h2>Empty weight build-up</h2>
       <table><tbody id="ewTable"></tbody></table>
     </section>
-    <p style="text-align:center;margin:4px 0 18px"><button type="button" class="btn" id="resetLoadBtn">Reset load sheet to the workbook example</button></p>
-    <p class="note" style="text-align:center;margin-top:-10px">Each aircraft keeps its own load sheet in this browser until it is reset.</p>
 </main>
 
 <section id="tabCalc" hidden>
@@ -522,8 +522,9 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
 
 <script>
 // ---------- Version (raise by 0.01 for every implemented change) ----------
-const APP_VERSION = '0.36';
+const APP_VERSION = '0.37';
 const CHANGELOG = [
+  ['0.37', '19-Nov-2026', '"Reset Load Sheet to EFB Default" button moved to the bottom of the Addendums tab.'],
   ['0.36', '19-Nov-2026', 'Each aircraft keeps its own load sheet (loads, addendums, temporary changes, operational gear, fuel) when switching aircraft and between visits; Summary Sheet button to reset it to the workbook example.'],
   ['0.35', '19-Nov-2026', 'Favourites list opens under the ★🕘 button.'],
   ['0.34', '19-Nov-2026', 'Favourites (★) and Recents per aircraft: save the load sheet, addendums, temporary changes, operational gear and fuel under a name and recall them from the ★🕘 list; Recents keep the last 10 loadings automatically.'],
@@ -1507,7 +1508,7 @@ window.addEventListener('beforeprint', ()=>{ if (!$('printView').innerHTML) buil
 window.addEventListener('afterprint', ()=>{ if (savedTitle){ document.title = savedTitle; savedTitle = null; } $('printView').innerHTML=''; });
 $('exportBtn').onclick = () => { pushRecent(); exportPDF(); };
 $('resetLoadBtn').onclick = () => {
-  if (!confirm(`Reset the load sheet for ${TAIL.reg} to the workbook example? Loads, addendum field changes, temporary changes, gear locations and fuel go back to the workbook values. The current load sheet is kept in Recents.`)) return;
+  if (!confirm(`Reset the load sheet for ${TAIL.reg} to the EFB default? Loads, addendum field changes, temporary changes, gear locations and fuel go back to the workbook values. The current load sheet is kept in Recents.`)) return;
   pushRecent();
   try { localStorage.removeItem(tailStateKey()); } catch(e){}
   lastRecalled = null;
@@ -1766,7 +1767,7 @@ function applyTail(typeChanged){
 sel.onchange = () => { pushRecent(); lastRecalled = null; applyTail(loadTail(sel.value)); };
 for (const r of document.querySelectorAll('input[name=pside]')) r.onchange = () => { S.pilotSide = r.value; render(); };
 applyTail(true);
-$('verTag').textContent = 'v' + APP_VERSION + ' · built 19-Nov-2026 15:34';
+$('verTag').textContent = 'v' + APP_VERSION + ' · built 19-Nov-2026 15:38';
 document.title = 'CCG W&B v' + APP_VERSION;
 </script>
 </body>
