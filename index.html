@@ -522,8 +522,9 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
 
 <script>
 // ---------- Version (raise by 0.01 for every implemented change) ----------
-const APP_VERSION = '0.37';
+const APP_VERSION = '0.38';
 const CHANGELOG = [
+  ['0.38', '19-Nov-2026', 'Favourites: saving or renaming under a name that already exists asks before replacing that favourite.'],
   ['0.37', '19-Nov-2026', '"Reset Load Sheet to EFB Default" button moved to the bottom of the Addendums tab.'],
   ['0.36', '19-Nov-2026', 'Each aircraft keeps its own load sheet (loads, addendums, temporary changes, operational gear, fuel) when switching aircraft and between visits; Summary Sheet button to reset it to the workbook example.'],
   ['0.35', '19-Nov-2026', 'Favourites list opens under the ★🕘 button.'],
@@ -1620,6 +1621,16 @@ function saveFavourite(name, replaceName){
   list.unshift({name, saved:new Date().toISOString(), snap:snapshot()});
   favStore('fav', list); lastRecalled = name; updateFavStar(); if (!$('favPop').hidden) drawFavList();
 }
+// Ask before a new save or rename replaces another favourite with the same name.
+function guardOverwrite(name, except, doIt){
+  if (!name){ alertNote('Type a name for the favourite.'); return false; }
+  if (name !== except && favLoad('fav').some(f=>f.name===name)){
+    favDialog('Replace favourite?', `“${name}” already exists for ${TAIL.reg}. Replace it with these settings?`, null,
+      [['Cancel','',null], ['Replace','danger',()=>{ doIt(); }]]);
+    return false;
+  }
+  return doIt();
+}
 function alertNote(t){ $('favDlgNote').textContent = t; $('favDlgNote').hidden = false; }
 $('favBtn').onclick = () => {
   const f = currentFav();
@@ -1627,14 +1638,15 @@ $('favBtn').onclick = () => {
     favDialog(`Favourite “${f.name}”`, `${TAIL.reg} · ${summary(f.snap)}`, f.name, [
       ['Delete', 'danger', () => { favStore('fav', favLoad('fav').filter(x=>x.name!==f.name)); updateFavStar(); if (!$('favPop').hidden) drawFavList(); }],
       ['Cancel', '', null],
-      ['Rename', 'primary', v => { if (!v) { alertNote('Type a name.'); return false; }
-        favStore('fav', favLoad('fav').map(x=>x.name===f.name ? {...x, name:v} : x).filter((x,i,a)=>a.findIndex(y=>y.name===x.name)===i)); updateFavStar(); if (!$('favPop').hidden) drawFavList(); }]
+      ['Rename', 'primary', v => guardOverwrite(v, f.name, () => {
+        favStore('fav', favLoad('fav').filter(x=>x.name!==v || x.name===f.name).map(x=>x.name===f.name ? {...x, name:v} : x));
+        if (lastRecalled===f.name) lastRecalled = v; updateFavStar(); if (!$('favPop').hidden) drawFavList(); })]
     ]);
   } else {
     const prev = lastRecalled && favLoad('fav').find(x=>x.name===lastRecalled);
     const btns = [['Cancel', '', null]];
     if (prev) btns.push([`Update “${prev.name}”`, '', () => saveFavourite(prev.name)]);
-    btns.push(['Save', 'primary', v => saveFavourite(v)]);
+    btns.push(['Save', 'primary', v => guardOverwrite(v, null, () => saveFavourite(v))]);
     favDialog(`Save favourite for ${TAIL.reg}`, prev ? `Changed since “${prev.name}” was recalled. Update it, or save these settings under a new name.` : 'Saves the load sheet, addendums, temporary changes, operational gear and fuel for this aircraft.', '', btns);
   }
 };
@@ -1668,9 +1680,8 @@ function drawFavList(){
     } else if (favTab==='recent'){
       const sv = document.createElement('button'); sv.type='button'; sv.className='act'; sv.textContent='★ Save';
       sv.onclick = e => { e.stopPropagation();
-        favDialog(`Save as favourite for ${TAIL.reg}`, it.sum, '', [['Cancel','',null], ['Save','primary', v => {
-          if (!v){ alertNote('Type a name for the favourite.'); return false; }
-          const l = favLoad('fav').filter(f=>f.name!==v); l.unshift({name:v, saved:new Date().toISOString(), snap:it.x.snap}); favStore('fav', l); updateFavStar(); drawFavList(); }]]);
+        favDialog(`Save as favourite for ${TAIL.reg}`, it.sum, '', [['Cancel','',null], ['Save','primary', v => guardOverwrite(v, null, () => {
+          const l = favLoad('fav').filter(f=>f.name!==v); l.unshift({name:v, saved:new Date().toISOString(), snap:it.x.snap}); favStore('fav', l); updateFavStar(); drawFavList(); })]]);
       };
       r.append(sv);
     }
@@ -1767,7 +1778,7 @@ function applyTail(typeChanged){
 sel.onchange = () => { pushRecent(); lastRecalled = null; applyTail(loadTail(sel.value)); };
 for (const r of document.querySelectorAll('input[name=pside]')) r.onchange = () => { S.pilotSide = r.value; render(); };
 applyTail(true);
-$('verTag').textContent = 'v' + APP_VERSION + ' · built 19-Nov-2026 15:38';
+$('verTag').textContent = 'v' + APP_VERSION + ' · built 19-Nov-2026 15:50';
 document.title = 'CCG W&B v' + APP_VERSION;
 </script>
 </body>
