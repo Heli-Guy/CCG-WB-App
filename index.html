@@ -468,6 +468,8 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
       <h2>Empty weight build-up</h2>
       <table><tbody id="ewTable"></tbody></table>
     </section>
+    <p style="text-align:center;margin:4px 0 18px"><button type="button" class="btn" id="resetLoadBtn">Reset load sheet to the workbook example</button></p>
+    <p class="note" style="text-align:center;margin-top:-10px">Each aircraft keeps its own load sheet in this browser until it is reset.</p>
 </main>
 
 <section id="tabCalc" hidden>
@@ -520,8 +522,9 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
 
 <script>
 // ---------- Version (raise by 0.01 for every implemented change) ----------
-const APP_VERSION = '0.35';
+const APP_VERSION = '0.36';
 const CHANGELOG = [
+  ['0.36', '19-Nov-2026', 'Each aircraft keeps its own load sheet (loads, addendums, temporary changes, operational gear, fuel) when switching aircraft and between visits; Summary Sheet button to reset it to the workbook example.'],
   ['0.35', '19-Nov-2026', 'Favourites list opens under the ★🕘 button.'],
   ['0.34', '19-Nov-2026', 'Favourites (★) and Recents per aircraft: save the load sheet, addendums, temporary changes, operational gear and fuel under a name and recall them from the ★🕘 list; Recents keep the last 10 loadings automatically.'],
   ['0.33', '6-Nov-2026', '429 operational gear can also be stowed at the pilot station (FS 147, BL +16.4), co-pilot station (FS 147, BL −15.4), mid passenger floor (FS 187.6) or aft passenger floor (FS 229); gear in the cabin counts toward the 1,200 lb cabin floor cargo limit.'],
@@ -1173,7 +1176,7 @@ function render(){
     <div class="c"><div class="k">Addend no(s)</div><div class="v">${S.addendums.join(' ')||'—'}</div></div>
     <div class="c"><div class="k">Arm long / lat in</div><div class="v small">${fmt(r.empty.cg,2)} / ${(r.empty.lat>=0?'+':'')+fmt(r.empty.lat,2)}</div></div>`;
   drawTemp();
-  drawDiagram(); drawAllGear(); updateFavStar(); drawChips(); drawEW(r); drawCalc(c, v, du);
+  drawDiagram(); drawAllGear(); updateFavStar(); saveTailState(); drawChips(); drawEW(r); drawCalc(c, v, du);
 }
 
 // Arm for a net-change line (addendum). When the net weight is tiny the "arm" is a meaningless number, so show a note instead.
@@ -1503,6 +1506,13 @@ function exportPDF(){
 window.addEventListener('beforeprint', ()=>{ if (!$('printView').innerHTML) buildPrintView(); });
 window.addEventListener('afterprint', ()=>{ if (savedTitle){ document.title = savedTitle; savedTitle = null; } $('printView').innerHTML=''; });
 $('exportBtn').onclick = () => { pushRecent(); exportPDF(); };
+$('resetLoadBtn').onclick = () => {
+  if (!confirm(`Reset the load sheet for ${TAIL.reg} to the workbook example? Loads, addendum field changes, temporary changes, gear locations and fuel go back to the workbook values. The current load sheet is kept in Recents.`)) return;
+  pushRecent();
+  try { localStorage.removeItem(tailStateKey()); } catch(e){}
+  lastRecalled = null;
+  applyTail(false);
+};
 // ---------- Favourites and recents (per aircraft, stored in this browser) ----------
 const FAV_MAX_RECENTS = 10;
 function favKey(kind, reg = TAIL.reg){ return `wb.${kind}.${reg}`; }
@@ -1722,18 +1732,41 @@ function applyType(){
   for (const r of document.querySelectorAll('input[name=pside]')) r.checked = r.value===S.pilotSide;
   drawGear(); layoutDiagram();
 }
+// Each aircraft keeps its own load sheet (loads, addendums, temp changes, gear, fuel) in this browser,
+// so switching to another aircraft and back brings it back as it was.
+function tailStateKey(reg = TAIL.reg){ return `wb.state.${reg}`; }
+let restoringTail = true;   // don't overwrite a stored load sheet while a tail is being set up
+function saveTailState(){
+  if (restoringTail) return;
+  try { localStorage.setItem(tailStateKey(), JSON.stringify(snapshot())); } catch(e){}
+}
+function storedTailState(reg = TAIL.reg){
+  try { const s = JSON.parse(localStorage.getItem(tailStateKey(reg)) || 'null'); return s && s.w ? s : null; } catch(e){ return null; }
+}
 function applyTail(typeChanged){
+  restoringTail = true;
   if (typeChanged) applyType();
   sel.value = TAIL.reg;
   $('amdPill').textContent = `W&B ${TAIL.report} · Amd ${TAIL.amendment}`;
   $('srcPill').textContent = `Workbook: ${TAIL.file}`;
-  S.addendums = [...TAIL.inEffect]; S.tre = []; S.ptemp = [{date:'',desc:'',w:'',fs:'',bl:''}];
-  buildTempTable(); render();
+  const saved = storedTailState();
+  // Start from the workbook example for this type, then the aircraft's own stored load sheet if it has one
+  resetLoadForType();
+  GEARLIST.forEach((g,i) => { g.loc = T.gear[i][2]; });
+  S.addendums = [...TAIL.inEffect]; S.tre = []; S.ptemp = [{date:'',desc:'',w:'',fs:'',bl:''}]; S.fill = null;
+  if (saved) applySnap(saved);
+  else {
+    $('fuel').value = S.fuel; $('lfuel').value = S.lfuel; $('door').value = S.door;
+    for (const r of document.querySelectorAll('input[name=pside]')) r.checked = r.value===S.pilotSide;
+    buildTempTable(); drawGear(); render();
+  }
+  restoringTail = false;
+  saveTailState();
 }
 sel.onchange = () => { pushRecent(); lastRecalled = null; applyTail(loadTail(sel.value)); };
 for (const r of document.querySelectorAll('input[name=pside]')) r.onchange = () => { S.pilotSide = r.value; render(); };
 applyTail(true);
-$('verTag').textContent = 'v' + APP_VERSION + ' · built 19-Nov-2026 15:28';
+$('verTag').textContent = 'v' + APP_VERSION + ' · built 19-Nov-2026 15:34';
 document.title = 'CCG W&B v' + APP_VERSION;
 </script>
 </body>
