@@ -241,14 +241,18 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
 .favbtn.on{border-color:#c88a00}.favbtn.on .star{color:#f0a400}
 .favpop{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.35);display:flex;align-items:flex-start;justify-content:center;padding-top:70px}
 .favpop[hidden]{display:none}
-.favpanel{width:min(430px,94vw);max-height:80vh;display:flex;flex-direction:column;background:var(--card);color:var(--ink);border-radius:14px;border:3px solid #1aa6d6;overflow:hidden}
+.favpop.anchored{display:block;padding:0}
+.favpop.anchored .favpanel{position:absolute}
+.favpanel::before{content:'';position:absolute;top:-11px;left:var(--caret,24px);width:16px;height:16px;background:var(--card);border-left:3px solid #1aa6d6;border-top:3px solid #1aa6d6;transform:rotate(45deg)}
+.favpop:not(.anchored) .favpanel::before{display:none}
+.favpanel{position:relative;overflow:visible!important;width:min(430px,94vw);max-height:80vh;display:flex;flex-direction:column;background:var(--card);color:var(--ink);border-radius:14px;border:3px solid #1aa6d6;overflow:hidden}
 .favhead{display:flex;align-items:center;justify-content:space-between;padding:10px 12px}
 .favhead b{font-size:18px}
 .favtabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:0 12px 8px;background:var(--subtle);border-radius:9px;padding:3px}
 .favtabs button{font:inherit;font-weight:600;border:0;border-radius:7px;padding:7px;background:transparent;color:var(--ink);cursor:pointer}
 .favtabs button[aria-selected=true]{background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.15)}
 #favFilter{margin:0 12px 8px;padding:8px 10px;border-radius:8px;border:1px solid var(--line);font:inherit;background:var(--bg);color:var(--ink)}
-.favlist{overflow:auto;border-top:1px solid var(--line)}
+.favlist{overflow:auto;border-top:1px solid var(--line);border-radius:0 0 11px 11px}
 .favrow{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line);cursor:pointer}
 .favrow:hover{background:var(--subtle)}
 .favrow .t{flex:1;min-width:0}
@@ -516,8 +520,9 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
 
 <script>
 // ---------- Version (raise by 0.01 for every implemented change) ----------
-const APP_VERSION = '0.34';
+const APP_VERSION = '0.35';
 const CHANGELOG = [
+  ['0.35', '19-Nov-2026', 'Favourites list opens under the ★🕘 button.'],
   ['0.34', '19-Nov-2026', 'Favourites (★) and Recents per aircraft: save the load sheet, addendums, temporary changes, operational gear and fuel under a name and recall them from the ★🕘 list; Recents keep the last 10 loadings automatically.'],
   ['0.33', '6-Nov-2026', '429 operational gear can also be stowed at the pilot station (FS 147, BL +16.4), co-pilot station (FS 147, BL −15.4), mid passenger floor (FS 187.6) or aft passenger floor (FS 229); gear in the cabin counts toward the 1,200 lb cabin floor cargo limit.'],
   ['0.32', '4-Nov-2026', 'Header (aircraft selector, Export PDF and tabs) stays at the top of the screen while scrolling.'],
@@ -1670,7 +1675,17 @@ function drawFavList(){
     rows.appendChild(r);
   });
 }
-$('favListBtn').onclick = () => { favEditing = false; $('favFilter').value=''; drawFavList(); $('favPop').hidden = false; };
+// The list opens just under the ★🕘 button, with a caret pointing at it
+function placeFavPop(){
+  const pop = $('favPop'), panel = pop.querySelector('.favpanel'), r = $('favListBtn').getBoundingClientRect();
+  const w = panel.offsetWidth || 430, left = Math.max(8, Math.min(r.left - 12, window.innerWidth - w - 8));
+  pop.classList.add('anchored');
+  panel.style.left = left + 'px'; panel.style.top = (r.bottom + 12) + 'px';
+  panel.style.maxHeight = Math.max(240, window.innerHeight - r.bottom - 24) + 'px';
+  panel.style.setProperty('--caret', Math.max(14, Math.min(w - 30, r.left + r.width/2 - left - 8)) + 'px');
+}
+$('favListBtn').onclick = () => { favEditing = false; $('favFilter').value=''; drawFavList(); $('favPop').hidden = false; placeFavPop(); };
+window.addEventListener('resize', () => { if (!$('favPop').hidden) placeFavPop(); });
 $('favClose').onclick = () => { $('favPop').hidden = true; };
 $('favPop').onclick = e => { if (e.target.id==='favPop') $('favPop').hidden = true; };
 $('favDlg').onclick = e => { if (e.target.id==='favDlg') $('favDlg').hidden = true; };
@@ -1718,7 +1733,7 @@ function applyTail(typeChanged){
 sel.onchange = () => { pushRecent(); lastRecalled = null; applyTail(loadTail(sel.value)); };
 for (const r of document.querySelectorAll('input[name=pside]')) r.onchange = () => { S.pilotSide = r.value; render(); };
 applyTail(true);
-$('verTag').textContent = 'v' + APP_VERSION + ' · built 19-Nov-2026 15:11';
+$('verTag').textContent = 'v' + APP_VERSION + ' · built 19-Nov-2026 15:28';
 document.title = 'CCG W&B v' + APP_VERSION;
 </script>
 </body>
