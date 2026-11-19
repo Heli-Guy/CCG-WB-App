@@ -234,6 +234,37 @@ label.f.big input{font-size:24px;font-weight:600}
 .allgear button.some{border-color:#1f5fbf;border-style:dashed}
 .allgear button small{display:block;font-size:10.5px;opacity:.75}
 header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.favbtn{font:inherit;display:inline-flex;align-items:center;gap:6px;min-height:40px;min-width:44px;padding:0 10px;border-radius:9px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;font-size:20px;line-height:1}
+.favbtn small{font-size:11px;margin-left:1px;vertical-align:super}
+.favbtn .favname{font-size:13px;font-weight:600;max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.favbtn .favname:empty{display:none}
+.favbtn.on{border-color:#c88a00}.favbtn.on .star{color:#f0a400}
+.favpop{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.35);display:flex;align-items:flex-start;justify-content:center;padding-top:70px}
+.favpop[hidden]{display:none}
+.favpanel{width:min(430px,94vw);max-height:80vh;display:flex;flex-direction:column;background:var(--card);color:var(--ink);border-radius:14px;border:3px solid #1aa6d6;overflow:hidden}
+.favhead{display:flex;align-items:center;justify-content:space-between;padding:10px 12px}
+.favhead b{font-size:18px}
+.favtabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:0 12px 8px;background:var(--subtle);border-radius:9px;padding:3px}
+.favtabs button{font:inherit;font-weight:600;border:0;border-radius:7px;padding:7px;background:transparent;color:var(--ink);cursor:pointer}
+.favtabs button[aria-selected=true]{background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+#favFilter{margin:0 12px 8px;padding:8px 10px;border-radius:8px;border:1px solid var(--line);font:inherit;background:var(--bg);color:var(--ink)}
+.favlist{overflow:auto;border-top:1px solid var(--line)}
+.favrow{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line);cursor:pointer}
+.favrow:hover{background:var(--subtle)}
+.favrow .t{flex:1;min-width:0}
+.favrow .t b{display:block;font-size:15px}
+.favrow .t span{display:block;font-size:12.5px;color:var(--muted)}
+.favrow .act{font:inherit;font-size:13px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink);padding:6px 9px;cursor:pointer;white-space:nowrap}
+.favrow .act.del{color:#c0262d;border-color:#e3a5a8}
+.favrow.cur{background:color-mix(in srgb,#f0a400 12%,transparent)}
+.favempty{padding:18px 14px;color:var(--muted);font-size:14px}
+.favdlg{width:min(400px,92vw);background:var(--card);color:var(--ink);border-radius:14px;padding:16px;display:grid;gap:10px;margin-top:60px;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.favdlg b{font-size:17px}
+.favdlg input{padding:10px;border-radius:8px;border:1px solid var(--line);font:inherit;font-size:16px;background:var(--bg);color:var(--ink)}
+.favdlg input[hidden]{display:none}
+.favdlgbtns{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.favdlgbtns .primary{background:#1f5fbf;color:#fff;border-color:#0d356f}
+.favdlgbtns .danger{color:#c0262d}
 #printView{display:none}
 .exportbtn{min-height:40px;font-weight:600}
 @media print{
@@ -322,6 +353,8 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
 <div class="banner">CCG W&amp;B <b id="verTag"></b> (web prototype) — for layout and calculation review only. Not approved for operational weight &amp; balance.</div>
 <header>
   <label class="tailpick"><span class="sr">Aircraft</span><select id="tailSel" aria-label="Aircraft"></select></label>
+  <button type="button" class="favbtn" id="favBtn" title="Save this loading as a favourite for this aircraft" aria-label="Save as favourite"><span class="star" aria-hidden="true">★</span><span class="favname" id="favName"></span></button>
+  <button type="button" class="favbtn" id="favListBtn" title="Favourites and recent loadings for this aircraft" aria-label="Favourites and recents"><span aria-hidden="true">★<small>🕘</small></span></button>
   <button type="button" class="btn exportbtn" id="exportBtn" title="Save or print the load sheet as a PDF">Export PDF</button>
   <span class="pill" id="typePill"></span>
   <span class="pill" id="amdPill"></span>
@@ -452,6 +485,22 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
 </section>
 
 <div id="printView" aria-hidden="true"></div>
+<div class="favpop" id="favPop" hidden>
+  <div class="favpanel" role="dialog" aria-label="Favourites and recents">
+    <div class="favhead"><button type="button" class="btn" id="favClose">Close</button><b id="favTitle">Favourites</b><button type="button" class="btn" id="favEdit">Edit</button></div>
+    <div class="favtabs" role="tablist"><button type="button" role="tab" id="favTabF" aria-selected="true">Favourites</button><button type="button" role="tab" id="favTabR" aria-selected="false">Recents</button></div>
+    <input type="search" id="favFilter" placeholder="Filter" aria-label="Filter">
+    <div class="favlist" id="favRows"></div>
+  </div>
+</div>
+<div class="favpop" id="favDlg" hidden>
+  <div class="favdlg" role="dialog" aria-labelledby="favDlgTitle">
+    <b id="favDlgTitle">Save favourite</b>
+    <p class="note" id="favDlgNote"></p>
+    <input type="text" id="favDlgName" maxlength="60" placeholder="Name, e.g. SAR – 2 pax + cargo" aria-label="Favourite name">
+    <div class="favdlgbtns" id="favDlgBtns"></div>
+  </div>
+</div>
 
 <div class="sheet" id="sheet">
   <div class="pop" role="dialog" aria-modal="true" aria-labelledby="popTitle">
@@ -467,8 +516,9 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
 
 <script>
 // ---------- Version (raise by 0.01 for every implemented change) ----------
-const APP_VERSION = '0.33';
+const APP_VERSION = '0.34';
 const CHANGELOG = [
+  ['0.34', '19-Nov-2026', 'Favourites (★) and Recents per aircraft: save the load sheet, addendums, temporary changes, operational gear and fuel under a name and recall them from the ★🕘 list; Recents keep the last 10 loadings automatically.'],
   ['0.33', '6-Nov-2026', '429 operational gear can also be stowed at the pilot station (FS 147, BL +16.4), co-pilot station (FS 147, BL −15.4), mid passenger floor (FS 187.6) or aft passenger floor (FS 229); gear in the cabin counts toward the 1,200 lb cabin floor cargo limit.'],
   ['0.32', '4-Nov-2026', 'Header (aircraft selector, Export PDF and tabs) stays at the top of the screen while scrolling.'],
   ['0.31', '4-Nov-2026', 'Load Sheet: "Gear — all seats" buttons to put a life jacket, helmet, headset or seat cover on every seat at once (tap again to remove from all).'],
@@ -1118,7 +1168,7 @@ function render(){
     <div class="c"><div class="k">Addend no(s)</div><div class="v">${S.addendums.join(' ')||'—'}</div></div>
     <div class="c"><div class="k">Arm long / lat in</div><div class="v small">${fmt(r.empty.cg,2)} / ${(r.empty.lat>=0?'+':'')+fmt(r.empty.lat,2)}</div></div>`;
   drawTemp();
-  drawDiagram(); drawAllGear(); drawChips(); drawEW(r); drawCalc(c, v, du);
+  drawDiagram(); drawAllGear(); updateFavStar(); drawChips(); drawEW(r); drawCalc(c, v, du);
 }
 
 // Arm for a net-change line (addendum). When the net weight is tiny the "arm" is a meaningless number, so show a note instead.
@@ -1447,7 +1497,191 @@ function exportPDF(){
 }
 window.addEventListener('beforeprint', ()=>{ if (!$('printView').innerHTML) buildPrintView(); });
 window.addEventListener('afterprint', ()=>{ if (savedTitle){ document.title = savedTitle; savedTitle = null; } $('printView').innerHTML=''; });
-$('exportBtn').onclick = exportPDF;
+$('exportBtn').onclick = () => { pushRecent(); exportPDF(); };
+// ---------- Favourites and recents (per aircraft, stored in this browser) ----------
+const FAV_MAX_RECENTS = 10;
+function favKey(kind, reg = TAIL.reg){ return `wb.${kind}.${reg}`; }
+function favLoad(kind, reg){ try { return JSON.parse(localStorage.getItem(favKey(kind, reg)) || '[]'); } catch(e){ return []; } }
+function favStore(kind, list, reg){ try { localStorage.setItem(favKey(kind, reg), JSON.stringify(list)); } catch(e){} }
+// Everything a favourite holds: loading, seat gear, fuel, hover-exit door, pilot seat, addendums, TREs, pilot temp changes, gear locations
+function snapshot(){
+  return JSON.parse(JSON.stringify({w:S.w, gear:S.gear, fuel:S.fuel, lfuel:S.lfuel, door:S.door, pilotSide:S.pilotSide,
+    addendums:S.addendums, tre:S.tre, ptemp:S.ptemp, gearLocs:GEARLIST.map(g=>g.loc)}));
+}
+// Canonical form, so two loadings that are the same compare equal (zero weights, unticked gear and empty rows ignored)
+function canon(s){
+  const w = Object.fromEntries(Object.entries(s.w||{}).filter(([,v])=>+v).sort());
+  const gear = Object.fromEntries(Object.entries(s.gear||{}).map(([k,g])=>[k, Object.fromEntries(Object.entries(g||{}).filter(([,v])=>v).sort())])
+    .filter(([,g])=>Object.keys(g).length).sort());
+  const ptemp = (s.ptemp||[]).filter(t=>t.desc||+t.w).map(t=>[t.date||'',t.desc||'',+t.w||0,+t.fs||0,+t.bl||0]);
+  return JSON.stringify([w, gear, +s.fuel||0, +s.lfuel||0, s.door, s.pilotSide, [...(s.addendums||[])].sort(), [...(s.tre||[])].sort(), ptemp, s.gearLocs||[]]);
+}
+function currentFav(){ const c = canon(snapshot()); return favLoad('fav').find(f=>canon(f.snap)===c) || null; }
+let lastRecalled = null;   // name of the favourite recalled last on this aircraft (offered as "Update" after changes)
+
+function applySnap(s){
+  const missing = (s.addendums||[]).filter(a=>!TAIL.addendums.some(x=>x.id===a));
+  S.w = {...(s.w||{})}; S.gear = JSON.parse(JSON.stringify(s.gear||{}));
+  S.fuel = +s.fuel||0; S.lfuel = +s.lfuel||0; S.door = s.door || T.doors[0].id; S.pilotSide = s.pilotSide || 'R';
+  S.addendums = (s.addendums||[]).filter(a=>TAIL.addendums.some(x=>x.id===a));
+  S.tre = (s.tre||[]).filter(id=>TRES.some(t=>t.id===id));
+  S.ptemp = (s.ptemp && s.ptemp.length) ? JSON.parse(JSON.stringify(s.ptemp)) : [{date:'',desc:'',w:'',fs:'',bl:''}];
+  (s.gearLocs||[]).forEach((loc,i)=>{ if (GEARLIST[i] && (loc==='Not on board' || loc==='Installed' || LOCS[loc])) GEARLIST[i].loc = loc; });
+  S.src = {}; S.fill = null;
+  $('fuel').value = S.fuel; $('lfuel').value = S.lfuel; $('door').value = S.door;
+  for (const r of document.querySelectorAll('input[name=pside]')) r.checked = r.value===S.pilotSide;
+  buildTempTable(); drawGear(); render();
+  return missing;
+}
+// Run fn with a stored loading applied, then put the current one back (used for the list summaries)
+function withSnap(s, fn){
+  const keep = snapshot(), keepSrc = S.src, keepFill = S.fill;
+  S.w = s.w||{}; S.gear = s.gear||{}; S.fuel = +s.fuel||0; S.lfuel = +s.lfuel||0; S.door = s.door; S.pilotSide = s.pilotSide||'R';
+  S.addendums = (s.addendums||[]).filter(a=>TAIL.addendums.some(x=>x.id===a)); S.tre = s.tre||[]; S.ptemp = s.ptemp||[];
+  (s.gearLocs||[]).forEach((loc,i)=>{ if (GEARLIST[i]) GEARLIST[i].loc = loc; });
+  let out; try { out = fn(); } finally {
+    Object.assign(S, {w:keep.w, gear:keep.gear, fuel:keep.fuel, lfuel:keep.lfuel, door:keep.door, pilotSide:keep.pilotSide, addendums:keep.addendums, tre:keep.tre, ptemp:keep.ptemp, src:keepSrc, fill:keepFill});
+    keep.gearLocs.forEach((loc,i)=>{ if (GEARLIST[i]) GEARLIST[i].loc = loc; });
+  }
+  return out;
+}
+// One-line summary: occupied passenger seats, cargo, fuel, gross weight, plus field changes / TREs / external load
+function summary(s){
+  return withSnap(s, () => {
+    const st = activeStations(), c = calc();
+    const pax = st.filter(x=>x.kind==='pax' && (S.w[x.id]||0)>0).length;
+    const cargo = st.filter(x=>x.kind==='cargo').reduce((a,x)=>a+(S.w[x.id]||0),0);
+    const ext = st.filter(x=>x.kind==='ext'||x.kind==='hover').reduce((a,x)=>a+(S.w[x.id]||0),0);
+    const parts = [`${pax} pax`];
+    if (cargo) parts.push(`${fmt(cargo,0)} lb cargo`);
+    if (ext) parts.push(`${fmt(ext,0)} lb external`);
+    parts.push(`${fmt(S.fuel,0)} lb fuel`, `${fmt(c.r.takeoff.w,0)} lb`);
+    const added = S.addendums.filter(a=>!TAIL.inEffect.includes(a)), removed = TAIL.inEffect.filter(a=>!S.addendums.includes(a));
+    if (added.length || removed.length) parts.push('addendums ' + [...added.map(a=>'+'+a), ...removed.map(a=>'−'+a)].join(' '));
+    if (S.tre.length) parts.push(S.tre.length===1 ? '1 TRE' : `${S.tre.length} TREs`);
+    return parts.join(' · ');
+  });
+}
+function whenLabel(iso){
+  const d = new Date(iso), now = new Date(), pad = n=>String(n).padStart(2,'0'), hm = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const day = x => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  const diff = Math.round((day(now) - day(d)) / 86400000);
+  if (diff === 0) return `Today ${hm}`;
+  if (diff === 1) return `Yesterday ${hm}`;
+  return `${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]} ${d.getDate()} ${MON[d.getMonth()]} ${hm}`;
+}
+// Recents: added when the PDF is exported, the aircraft is changed, a favourite is recalled, or the page is left
+function pushRecent(reg = TAIL.reg){
+  const s = snapshot(), c = canon(s), list = favLoad('recent', reg).filter(x=>canon(x.snap)!==c);
+  list.unshift({at:new Date().toISOString(), snap:s});
+  favStore('recent', list.slice(0, FAV_MAX_RECENTS), reg);
+}
+
+function updateFavStar(){
+  const f = currentFav(), b = $('favBtn');
+  b.classList.toggle('on', !!f);
+  $('favName').textContent = f ? f.name : '';
+  b.title = f ? `Favourite “${f.name}” — tap to rename or delete` : 'Save this loading as a favourite for this aircraft';
+  b.setAttribute('aria-label', f ? `Favourite ${f.name}` : 'Save as favourite');
+}
+
+// Small dialog: title, note, optional name field, buttons [[label, cls, fn(name)]]
+function favDialog(title, note, name, buttons){
+  $('favDlgTitle').textContent = title; $('favDlgNote').textContent = note || ''; $('favDlgNote').hidden = !note;
+  const inp = $('favDlgName'); inp.hidden = name === null; inp.value = name || '';
+  const box = $('favDlgBtns'); box.innerHTML = '';
+  for (const [label, cls, fn] of buttons){
+    const b = document.createElement('button'); b.type='button'; b.className = 'btn ' + (cls||''); b.textContent = label;
+    b.onclick = () => { const v = inp.value.trim(); if (fn && fn(v) === false) return; $('favDlg').hidden = true; };
+    box.appendChild(b);
+  }
+  $('favDlg').hidden = false;
+  if (name !== null) setTimeout(()=>inp.focus(), 30);
+}
+function saveFavourite(name, replaceName){
+  if (!name){ alertNote('Type a name for the favourite.'); return false; }
+  const list = favLoad('fav').filter(f=>f.name!==name && f.name!==replaceName);
+  list.unshift({name, saved:new Date().toISOString(), snap:snapshot()});
+  favStore('fav', list); lastRecalled = name; updateFavStar(); if (!$('favPop').hidden) drawFavList();
+}
+function alertNote(t){ $('favDlgNote').textContent = t; $('favDlgNote').hidden = false; }
+$('favBtn').onclick = () => {
+  const f = currentFav();
+  if (f){
+    favDialog(`Favourite “${f.name}”`, `${TAIL.reg} · ${summary(f.snap)}`, f.name, [
+      ['Delete', 'danger', () => { favStore('fav', favLoad('fav').filter(x=>x.name!==f.name)); updateFavStar(); if (!$('favPop').hidden) drawFavList(); }],
+      ['Cancel', '', null],
+      ['Rename', 'primary', v => { if (!v) { alertNote('Type a name.'); return false; }
+        favStore('fav', favLoad('fav').map(x=>x.name===f.name ? {...x, name:v} : x).filter((x,i,a)=>a.findIndex(y=>y.name===x.name)===i)); updateFavStar(); if (!$('favPop').hidden) drawFavList(); }]
+    ]);
+  } else {
+    const prev = lastRecalled && favLoad('fav').find(x=>x.name===lastRecalled);
+    const btns = [['Cancel', '', null]];
+    if (prev) btns.push([`Update “${prev.name}”`, '', () => saveFavourite(prev.name)]);
+    btns.push(['Save', 'primary', v => saveFavourite(v)]);
+    favDialog(`Save favourite for ${TAIL.reg}`, prev ? `Changed since “${prev.name}” was recalled. Update it, or save these settings under a new name.` : 'Saves the load sheet, addendums, temporary changes, operational gear and fuel for this aircraft.', '', btns);
+  }
+};
+
+let favTab = 'fav', favEditing = false;
+function drawFavList(){
+  $('favTitle').textContent = `${favTab==='fav' ? 'Favourites' : 'Recents'} · ${TAIL.reg}`;
+  $('favTabF').setAttribute('aria-selected', favTab==='fav'); $('favTabR').setAttribute('aria-selected', favTab==='recent');
+  $('favEdit').hidden = favTab!=='fav'; $('favEdit').textContent = favEditing ? 'Done' : 'Edit';
+  const q = $('favFilter').value.trim().toLowerCase(), cur = canon(snapshot()), favs = favLoad('fav');
+  const rows = $('favRows'); rows.innerHTML = '';
+  const items = favLoad(favTab).map(x => {
+    const fav = favTab==='fav' ? x : favs.find(f=>canon(f.snap)===canon(x.snap));
+    const title = favTab==='fav' ? x.name : whenLabel(x.at) + (fav ? ` — “${fav.name}”` : '');
+    return {x, title, sum: summary(x.snap)};
+  }).filter(it => !q || (it.title + ' ' + it.sum).toLowerCase().includes(q));
+  if (!items.length){
+    rows.innerHTML = `<div class="favempty">${favTab==='fav' ? (q ? 'No favourite matches the filter.' : `No favourites for ${TAIL.reg} yet. Set up the load sheet, then tap ★ to save it.`) : 'No recent loadings for this aircraft yet. Loadings are added when you export the PDF, change aircraft or recall a favourite.'}</div>`;
+    return;
+  }
+  items.forEach((it, i) => {
+    const r = document.createElement('div'); r.className = 'favrow' + (canon(it.x.snap)===cur ? ' cur' : ''); r.tabIndex = 0;
+    r.innerHTML = `<div class="t"><b></b><span></span></div>`;
+    r.querySelector('b').textContent = it.title; r.querySelector('span').textContent = it.sum;
+    if (favTab==='fav' && favEditing){
+      const up = document.createElement('button'); up.type='button'; up.className='act'; up.textContent='▲'; up.title='Move up'; up.disabled = i===0;
+      up.onclick = e => { e.stopPropagation(); const l = favLoad('fav'), k = l.findIndex(f=>f.name===it.x.name); if (k>0){ [l[k-1], l[k]] = [l[k], l[k-1]]; favStore('fav', l); drawFavList(); } };
+      const del = document.createElement('button'); del.type='button'; del.className='act del'; del.textContent='Delete';
+      del.onclick = e => { e.stopPropagation(); if (confirm(`Delete the favourite “${it.x.name}” for ${TAIL.reg}?`)){ favStore('fav', favLoad('fav').filter(f=>f.name!==it.x.name)); drawFavList(); updateFavStar(); } };
+      r.append(up, del);
+    } else if (favTab==='recent'){
+      const sv = document.createElement('button'); sv.type='button'; sv.className='act'; sv.textContent='★ Save';
+      sv.onclick = e => { e.stopPropagation();
+        favDialog(`Save as favourite for ${TAIL.reg}`, it.sum, '', [['Cancel','',null], ['Save','primary', v => {
+          if (!v){ alertNote('Type a name for the favourite.'); return false; }
+          const l = favLoad('fav').filter(f=>f.name!==v); l.unshift({name:v, saved:new Date().toISOString(), snap:it.x.snap}); favStore('fav', l); updateFavStar(); drawFavList(); }]]);
+      };
+      r.append(sv);
+    }
+    const recall = () => {
+      if (favTab==='fav' && favEditing) return;
+      if (canon(snapshot()) !== canon(it.x.snap)) pushRecent();   // keep what was on screen in Recents
+      const missing = applySnap(it.x.snap);
+      lastRecalled = favTab==='fav' ? it.x.name : null;
+      $('favPop').hidden = true;
+      if (missing.length) favDialog('Recalled with changes', `Addendum${missing.length>1?'s':''} ${missing.join(', ')} no longer exist${missing.length>1?'':'s'} in the current workbook for ${TAIL.reg} and ${missing.length>1?'were':'was'} not applied. Check the Addendums tab.`, null, [['OK','primary',null]]);
+    };
+    r.onclick = recall; r.onkeydown = e => { if (e.key==='Enter') recall(); };
+    rows.appendChild(r);
+  });
+}
+$('favListBtn').onclick = () => { favEditing = false; $('favFilter').value=''; drawFavList(); $('favPop').hidden = false; };
+$('favClose').onclick = () => { $('favPop').hidden = true; };
+$('favPop').onclick = e => { if (e.target.id==='favPop') $('favPop').hidden = true; };
+$('favDlg').onclick = e => { if (e.target.id==='favDlg') $('favDlg').hidden = true; };
+$('favTabF').onclick = () => { favTab='fav'; drawFavList(); };
+$('favTabR').onclick = () => { favTab='recent'; favEditing=false; drawFavList(); };
+$('favEdit').onclick = () => { favEditing = !favEditing; drawFavList(); };
+$('favFilter').oninput = drawFavList;
+$('favDlgName').onkeydown = e => { if (e.key==='Enter'){ const b = $('favDlgBtns').querySelector('.primary'); if (b) b.click(); } };
+document.addEventListener('visibilitychange', () => { if (document.visibilityState==='hidden') pushRecent(); });
+window.addEventListener('pagehide', () => pushRecent());
+
 
 $('fuelSlider').oninput=e=>{ S.fuel=+e.target.value; $('fuel').value=S.fuel; render(); };
 $('lfuel').oninput=e=>{ S.lfuel=Math.max(0,+e.target.value||0); render(); };
@@ -1481,10 +1715,10 @@ function applyTail(typeChanged){
   S.addendums = [...TAIL.inEffect]; S.tre = []; S.ptemp = [{date:'',desc:'',w:'',fs:'',bl:''}];
   buildTempTable(); render();
 }
-sel.onchange = () => { applyTail(loadTail(sel.value)); };
+sel.onchange = () => { pushRecent(); lastRecalled = null; applyTail(loadTail(sel.value)); };
 for (const r of document.querySelectorAll('input[name=pside]')) r.onchange = () => { S.pilotSide = r.value; render(); };
 applyTail(true);
-$('verTag').textContent = 'v' + APP_VERSION + ' · built 6-Nov-2026 13:33';
+$('verTag').textContent = 'v' + APP_VERSION + ' · built 19-Nov-2026 15:11';
 document.title = 'CCG W&B v' + APP_VERSION;
 </script>
 </body>
