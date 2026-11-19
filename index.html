@@ -235,7 +235,8 @@ label.f.big input{font-size:24px;font-weight:600}
 .allgear button small{display:block;font-size:10.5px;opacity:.75}
 header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
 .favbtn{font:inherit;display:inline-flex;align-items:center;gap:6px;min-height:40px;min-width:44px;padding:0 10px;border-radius:9px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;font-size:20px;line-height:1}
-.favbtn small{font-size:11px;margin-left:1px;vertical-align:super}
+.favbtn .clk{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+#favListBtn{gap:5px}
 .favbtn .favname{font-size:13px;font-weight:600;max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .favbtn .favname:empty{display:none}
 .favbtn.on{border-color:#c88a00}.favbtn.on .star{color:#f0a400}
@@ -358,7 +359,7 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
 <header>
   <label class="tailpick"><span class="sr">Aircraft</span><select id="tailSel" aria-label="Aircraft"></select></label>
   <button type="button" class="favbtn" id="favBtn" title="Save this loading as a favourite for this aircraft" aria-label="Save as favourite"><span class="star" aria-hidden="true">★</span><span class="favname" id="favName"></span></button>
-  <button type="button" class="favbtn" id="favListBtn" title="Favourites and recent loadings for this aircraft" aria-label="Favourites and recents"><span aria-hidden="true">★<small>🕘</small></span></button>
+  <button type="button" class="favbtn" id="favListBtn" title="Favourites and recent loadings for this aircraft" aria-label="Favourites and recents"><span aria-hidden="true">★</span><svg class="clk" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 6.5V12l4 4"/></svg></button>
   <button type="button" class="btn exportbtn" id="exportBtn" title="Save or print the load sheet as a PDF">Export PDF</button>
   <span class="pill" id="typePill"></span>
   <span class="pill" id="amdPill"></span>
@@ -522,8 +523,9 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
 
 <script>
 // ---------- Version (raise by 0.01 for every implemented change) ----------
-const APP_VERSION = '0.38';
+const APP_VERSION = '0.39';
 const CHANGELOG = [
+  ['0.39', '19-Nov-2026', 'Favourites list button: clock emoji replaced with a line clock icon.'],
   ['0.38', '19-Nov-2026', 'Favourites: saving or renaming under a name that already exists asks before replacing that favourite.'],
   ['0.37', '19-Nov-2026', '"Reset Load Sheet to EFB Default" button moved to the bottom of the Addendums tab.'],
   ['0.36', '19-Nov-2026', 'Each aircraft keeps its own load sheet (loads, addendums, temporary changes, operational gear, fuel) when switching aircraft and between visits; Summary Sheet button to reset it to the workbook example.'],
@@ -1778,7 +1780,7 @@ function applyTail(typeChanged){
 sel.onchange = () => { pushRecent(); lastRecalled = null; applyTail(loadTail(sel.value)); };
 for (const r of document.querySelectorAll('input[name=pside]')) r.onchange = () => { S.pilotSide = r.value; render(); };
 applyTail(true);
-$('verTag').textContent = 'v' + APP_VERSION + ' · built 19-Nov-2026 15:50';
+$('verTag').textContent = 'v' + APP_VERSION + ' · built 19-Nov-2026 16:09';
 document.title = 'CCG W&B v' + APP_VERSION;
 </script>
 </body>
