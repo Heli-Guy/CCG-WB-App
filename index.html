@@ -383,7 +383,7 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
     <div id="du"></div>
   </section>
   <div class="midcol" id="midCol">
-    <section class="card pside" id="pilotSideRow" hidden><span>Pilot seat</span><div class="seg two" role="radiogroup" aria-label="Pilot seat"><label><input type="radio" name="pside" value="R">Right (normal)</label><label><input type="radio" name="pside" value="L">Left (longline)</label></div></section>
+    <section class="card pside" id="pilotSideRow" hidden><span>Pilot seat</span><div class="seg two" role="radiogroup" aria-label="Pilot seat"><label><input type="radio" name="pside" value="L">Left (longline)</label><label><input type="radio" name="pside" value="R">Right (normal)</label></div></section>
     <section class="card">
       <div class="fuelrow"><label class="f big">TAKEOFF FUEL (LB)<input type="number" id="fuel" inputmode="decimal" value="1400" min="0"></label><button type="button" class="btn fillmax" id="fillMax">Fill Max</button></div>
       <div class="note fillnote" id="fillNote" hidden></div>
@@ -523,8 +523,9 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
 
 <script>
 // ---------- Version (raise by 0.01 for every implemented change) ----------
-const APP_VERSION = '0.39';
+const APP_VERSION = '0.40';
 const CHANGELOG = [
+  ['0.40', '19-Nov-2026', '412 pilot seat selector: Left (longline) on the left, Right (normal) on the right.'],
   ['0.39', '19-Nov-2026', 'Favourites list button: clock emoji replaced with a line clock icon.'],
   ['0.38', '19-Nov-2026', 'Favourites: saving or renaming under a name that already exists asks before replacing that favourite.'],
   ['0.37', '19-Nov-2026', '"Reset Load Sheet to EFB Default" button moved to the bottom of the Addendums tab.'],
@@ -1780,7 +1781,7 @@ function applyTail(typeChanged){
 sel.onchange = () => { pushRecent(); lastRecalled = null; applyTail(loadTail(sel.value)); };
 for (const r of document.querySelectorAll('input[name=pside]')) r.onchange = () => { S.pilotSide = r.value; render(); };
 applyTail(true);
-$('verTag').textContent = 'v' + APP_VERSION + ' · built 19-Nov-2026 16:09';
+$('verTag').textContent = 'v' + APP_VERSION + ' · built 19-Nov-2026 20:35';
 document.title = 'CCG W&B v' + APP_VERSION;
 </script>
 </body>
