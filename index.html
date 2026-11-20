@@ -203,7 +203,8 @@ nav.tabs button[aria-selected=true]{background:#1f5fbf;border-color:#0d356f;colo
 .balbar .trav{background:#6bc7db;top:5px;bottom:5px}.balbar .trav.out{background:#db2929}
 .balbar .tick{width:3px;background:#fff;margin-left:-1.5px}
 .balbar .lim{width:4px;background:#db2929;margin-left:-2px}
-.ballbl{display:flex;justify-content:space-between;color:#6bc7db;font-weight:700;font-size:13px;margin-top:4px}
+.ballbl span:last-child{text-align:right}
+.ballbl{display:grid;grid-template-columns:1fr auto 1fr;color:#6bc7db;font-weight:700;font-size:13px;margin-top:4px}
 .mfdsep{border-top:1px solid rgba(255,255,255,.5);margin:10px 0}
 .durow{display:flex;justify-content:space-between;align-items:center;padding:2px 0}
 .durow .k{color:#6bc7db;font-weight:700;font-size:16px}.durow .s{font-size:10px;color:rgba(255,255,255,.55)}
@@ -533,8 +534,9 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
 
 <script>
 // ---------- Version (raise by 0.01 for every implemented change) ----------
-const APP_VERSION = '0.52';
+const APP_VERSION = '0.53';
 const CHANGELOG = [
+  ['0.53', '20-Nov-2026', 'BALANCE and LATERAL captions centred under their bars.'],
   ['0.52', '20-Nov-2026', 'Button caption: "Reset Addendums to EFB Default".'],
   ['0.51', '20-Nov-2026', '"Reset addendums to EFB Default" shown as a blue button like the load sheet reset.'],
   ['0.50', '20-Nov-2026', 'Addendums tab buttons renamed: "Reset addendums to EFB Default" (addendums only) and "Reset Entire Load Sheet to EFB Default".'],
@@ -1870,7 +1872,7 @@ function applyTail(typeChanged){
 sel.onchange = () => { pushRecent(); lastRecalled = null; applyTail(loadTail(sel.value)); };
 for (const r of document.querySelectorAll('input[name=pside]')) r.onchange = () => { S.pilotSide = r.value; render(); };
 applyTail(true);
-$('verTag').textContent = 'v' + APP_VERSION + ' · built 20-Nov-2026 12:14';
+$('verTag').textContent = 'v' + APP_VERSION + ' · built 20-Nov-2026 12:17';
 document.title = 'CCG W&B v' + APP_VERSION;
 </script>
 </body>
