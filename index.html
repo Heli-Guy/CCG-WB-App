@@ -531,8 +531,9 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
 
 <script>
 // ---------- Version (raise by 0.01 for every implemented change) ----------
-const APP_VERSION = '0.42';
+const APP_VERSION = '0.43';
 const CHANGELOG = [
+  ['0.43', '20-Nov-2026', '429 hover exit via the co-pilot crew door: person on the forward toe step of the left skid at FS 154 (measured on the RFM station diagram).'],
   ['0.42', '20-Nov-2026', 'WITHIN LIMITS · NOTES (amber) now only for drop-off check, Area ① with floats and landing fuel below reserve; journey-log reminders (addendum changes, temp changes, TREs) and the FMS-12 note no longer turn it amber. Lateral balance bar under the longitudinal one. Bear paws and vertical reference door drawn when fitted. Simulators C-FSIM (SIM 906, Bell 429) and C-GSIM (SIM 907, Bell 412) added. Workbook file date shown in the title bar.'],
   ['0.41', '20-Nov-2026', 'Save / rename favourite window opens under the ★ button, like the favourites list under ★🕘.'],
   ['0.40', '19-Nov-2026', '412 pilot seat selector: Left (longline) on the left, Right (normal) on the right.'],
@@ -677,7 +678,9 @@ const T429 = {
   bearPaws:{fs:285, x:[57.5,456.5], hw:7, letter:/remove.*bear ?paws/i, shownWhen:'out'},
   // Vertical reference (bubble) door replaces the pilot crew door (right side)
   vrDoor:{cx:382, cy:305, rx:13, ry:58, letter:/vert(ical)? ?ref.*door/i, shownWhen:'in'},
-  doors:[{id:'sliding', label:'Sliding passenger door (FS 220)', fs:220, corr:924}, {id:'hinged', label:'Hinged passenger door (FS 190)', fs:190, corr:-240}],
+  doors:[{id:'sliding', label:'Sliding passenger door (FS 220)', fs:220, corr:924}, {id:'hinged', label:'Hinged passenger door (FS 190)', fs:190, corr:-240},
+    // co-pilot crew door: exit from the forward toe step of the skid, FS 154 measured on the RFM station diagram; no door-open moment correction in the workbook
+    {id:'copilot', label:'Co-pilot crew door (FS 154)', fs:154, corr:0}],
   env:{
     long: [[221.8,5100],[221.8,7000],[223.1,7500],[227.9,7500],[233,5700],[233,4400]],
     longExt: [[221.8,5100],[221.8,7000],[224.4,8000],[230,8000],[233,5700],[233,4400]],
@@ -1842,7 +1845,7 @@ function applyTail(typeChanged){
 sel.onchange = () => { pushRecent(); lastRecalled = null; applyTail(loadTail(sel.value)); };
 for (const r of document.querySelectorAll('input[name=pside]')) r.onchange = () => { S.pilotSide = r.value; render(); };
 applyTail(true);
-$('verTag').textContent = 'v' + APP_VERSION + ' · built 20-Nov-2026 11:07';
+$('verTag').textContent = 'v' + APP_VERSION + ' · built 20-Nov-2026 11:20';
 document.title = 'CCG W&B v' + APP_VERSION;
 </script>
 </body>
