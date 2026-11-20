@@ -39,7 +39,9 @@ main{padding:14px;max-width:1400px;margin:0 auto}
 .st .lbl.left{text-anchor:start}
 .floats rect{fill:#e9ebee;stroke:#2b2f35;stroke-width:1.6}
 .floats line{stroke:#8a9099;stroke-width:1.2}
-.bearpaw path{fill:#16191d;stroke:#000;stroke-width:1.2;stroke-linejoin:round}.bearpaw line{stroke:#4a4f57;stroke-width:2.2;stroke-linecap:round}.bearpaw line.tube{stroke:#3a3f46;stroke-width:5}
+.bearpaw path{fill:#16191d;stroke:#000;stroke-width:1.2;stroke-linejoin:round}
+@media (prefers-color-scheme: dark){.bearpaw path{stroke:#9aa1ab}}
+#printView .bearpaw path{stroke:#000!important}
 .vrdoor ellipse{fill:rgba(150,220,240,.85);stroke:#2b2f35;stroke-width:1.8}.vrdoor .shine{fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;opacity:.9}
 .fltxt{font-size:10px;font-weight:700;fill:#16191d;text-anchor:middle;paint-order:stroke;stroke:#fff;stroke-width:3px}
 .st .ico path{fill:#16191d;opacity:.18}
@@ -531,8 +533,9 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
 
 <script>
 // ---------- Version (raise by 0.01 for every implemented change) ----------
-const APP_VERSION = '0.44';
+const APP_VERSION = '0.45';
 const CHANGELOG = [
+  ['0.45', '20-Nov-2026', 'Bear paws: openings see-through, centred on the skid tubes and drawn underneath them.'],
   ['0.44', '20-Nov-2026', 'Hover exit doors listed front to back (429: co-pilot crew door, hinged, sliding; 412: crew door, sliding); the sliding door is still the default.'],
   ['0.43', '20-Nov-2026', '429 hover exit via the co-pilot crew door: person on the forward toe step of the left skid at FS 154 (measured on the RFM station diagram).'],
   ['0.42', '20-Nov-2026', 'WITHIN LIMITS · NOTES (amber) now only for drop-off check, Area ① with floats and landing fuel below reserve; journey-log reminders (addendum changes, temp changes, TREs) and the FMS-12 note no longer turn it amber. Lateral balance bar under the longitudinal one. Bear paws and vertical reference door drawn when fitted. Simulators C-FSIM (SIM 906, Bell 429) and C-GSIM (SIM 907, Bell 412) added. Workbook file date shown in the title bar.'],
@@ -676,7 +679,7 @@ const T429 = {
   floatsLetter:'J', hookRemovedLetter:'M', litterLetter:'O',
   floats:{rects:[[46,69,352,822],[445,468,352,822]], label:[[57.5,345],[456.5,345]]},
   // Dart bear paws on the aft skid tubes (arm from the removal addendum: 6,327 / 22.2 = FS 285); half-width in inches
-  bearPaws:{fs:285, x:[57.5,456.5], hw:7, letter:/remove.*bear ?paws/i, shownWhen:'out'},
+  bearPaws:{fs:285, x:[71.5,448.5], hw:7, letter:/remove.*bear ?paws/i, shownWhen:'out'},
   // Vertical reference (bubble) door replaces the pilot crew door (right side)
   vrDoor:{cx:382, cy:305, rx:13, ry:58, letter:/vert(ical)? ?ref.*door/i, shownWhen:'in'},
   // listed front to back; the sliding door stays the default (defaultDoor)
@@ -758,7 +761,7 @@ const T412 = {
   floatsLetter:'N', hookRemovedLetter:'O', litterLetter:'L',
   floats:{rects:[[12,33,290,356],[12,33,474,800],[487,508,290,376],[487,508,494,800]], label:[[24,282],[496,282]]},
   // Dart bear paws on the skid tubes (arm from the removal addendum: 4,816 / 28 = FS 172)
-  bearPaws:{fs:172, x:[22.5,497.5], hw:6, letter:/remove.*bear ?paws/i, shownWhen:'out'},
+  bearPaws:{fs:172, x:[31,487], hw:6, letter:/remove.*bear ?paws/i, shownWhen:'out'},
   // Dart vertical reference (bubble) door on the left crew door, fitted unless "Remove Dart VR Door" is in effect
   vrDoor:{cx:110, cy:300, rx:14, ry:66, letter:/vr door/i, shownWhen:'out'},
   doors:[{id:'crew', label:'Crew door (FS 47)', fs:47, corr:0}, {id:'sliding', label:'Sliding cabin door (FS 110)', fs:110, corr:3254.5}],
@@ -967,14 +970,19 @@ function drawDiagram(){
     }
     for (const [x,y] of T.floats.label){ const t = el('text',{x,y,class:'fltxt'},fg); t.textContent='FLOATS'; }
   }
-  if (kitShown(T.bearPaws)){ // Dart bear paws on the skid tubes, drawn in black (top view of the plate, tongue forward)
-    const bp = T.bearPaws, k = bp.hw * T.img.px, y0 = sy(bp.fs), bg = el('g',{class:'bearpaw','aria-hidden':'true'},svg);
-    const shape = [[-.38,-1.62],[.38,-1.62],[.45,-1.1],[.62,-.75],[1,-.52],[1,.88],[.88,1],[-.88,1],[-1,.88],[-1,-.52],[-.62,-.75],[-.45,-1.1]];   // Alpine Aerotech/Dart drawing: tongue forward, plate aft
+  if (kitShown(T.bearPaws)){ // Dart bear paws: black plate centred on each skid tube, drawn under the drawing so the tube sits on top;
+    // the openings are cut out (transparent). Plan view: narrow tongue forward, wide plate aft.
+    const bp = T.bearPaws, k = bp.hw * T.img.px, y0 = sy(bp.fs), bg = el('g',{class:'bearpaw','aria-hidden':'true'},under);
+    const shape = [[-.38,-1.62],[.38,-1.62],[.45,-1.1],[.62,-.75],[1,-.52],[1,.88],[.88,1],[-.88,1],[-1,.88],[-1,-.52],[-.62,-.75],[-.45,-1.1]];
+    const P = (x0,u,v) => `${(x0+u*k).toFixed(1)},${(y0+v*k).toFixed(1)}`;
     for (const xs of bp.x){
       const x0 = Math.max(k + 2, Math.min(518 - k, xs));   // keep the plate inside the drawing
-      el('path',{d:'M'+shape.map(([u,v])=>`${(x0+u*k).toFixed(1)},${(y0+v*k).toFixed(1)}`).join('L')+'Z'},bg);
-      for (const v of [-.25,.15,.55]) for (const s of [-1,1]) el('line',{x1:x0+s*.42*k,x2:x0+s*.78*k,y1:y0+v*k,y2:y0+v*k},bg);
-      el('line',{class:'tube',x1:x0,x2:x0,y1:y0-1.5*k,y2:y0+.9*k},bg);
+      let d = 'M'+shape.map(([u,v])=>P(x0,u,v)).join('L')+'Z';
+      for (const v of [-.33,.07,.47]) for (const s of [-1,1]){   // three slots each side
+        const [a,b] = s<0 ? [-.82,-.36] : [.36,.82];
+        d += `M${P(x0,a,v)}L${P(x0,b,v)}L${P(x0,b,v+.2)}L${P(x0,a,v+.2)}Z`;
+      }
+      el('path',{d,'fill-rule':'evenodd'},bg);
     }
   }
   if (kitShown(T.vrDoor)){ // vertical reference door: bubble window bulging out of the crew door
@@ -1847,7 +1855,7 @@ function applyTail(typeChanged){
 sel.onchange = () => { pushRecent(); lastRecalled = null; applyTail(loadTail(sel.value)); };
 for (const r of document.querySelectorAll('input[name=pside]')) r.onchange = () => { S.pilotSide = r.value; render(); };
 applyTail(true);
-$('verTag').textContent = 'v' + APP_VERSION + ' · built 20-Nov-2026 11:24';
+$('verTag').textContent = 'v' + APP_VERSION + ' · built 20-Nov-2026 11:28';
 document.title = 'CCG W&B v' + APP_VERSION;
 </script>
 </body>
