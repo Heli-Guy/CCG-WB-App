@@ -419,7 +419,7 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
       <div class="chips" id="addChips"></div>
       <div class="fieldnote" id="fieldNote"></div>
       <div class="note">Blue = maintenance configuration from the workbook. Orange = field change made on this iPad. Record field changes in the journey log.</div>
-      <button type="button" class="btn" id="resetBtn" style="margin-top:10px;display:none">Reset addendums to EFB Default</button>
+      <button type="button" class="btn" id="resetBtn" style="margin-top:10px;display:none">Reset Addendums to EFB Default</button>
     </section>
     <p style="text-align:center;margin:4px 0 18px"><button type="button" class="btn" id="resetLoadBtn">Reset Entire Load Sheet to EFB Default</button></p>
     <p class="note" style="text-align:center;margin-top:-10px">Each aircraft keeps its own load sheet in this browser until it is reset.</p>
@@ -533,8 +533,9 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
 
 <script>
 // ---------- Version (raise by 0.01 for every implemented change) ----------
-const APP_VERSION = '0.51';
+const APP_VERSION = '0.52';
 const CHANGELOG = [
+  ['0.52', '20-Nov-2026', 'Button caption: "Reset Addendums to EFB Default".'],
   ['0.51', '20-Nov-2026', '"Reset addendums to EFB Default" shown as a blue button like the load sheet reset.'],
   ['0.50', '20-Nov-2026', 'Addendums tab buttons renamed: "Reset addendums to EFB Default" (addendums only) and "Reset Entire Load Sheet to EFB Default".'],
   ['0.49', '20-Nov-2026', 'Vertical reference door bubble turned a few degrees so its base follows the door frame.'],
@@ -1869,7 +1870,7 @@ function applyTail(typeChanged){
 sel.onchange = () => { pushRecent(); lastRecalled = null; applyTail(loadTail(sel.value)); };
 for (const r of document.querySelectorAll('input[name=pside]')) r.onchange = () => { S.pilotSide = r.value; render(); };
 applyTail(true);
-$('verTag').textContent = 'v' + APP_VERSION + ' · built 20-Nov-2026 12:12';
+$('verTag').textContent = 'v' + APP_VERSION + ' · built 20-Nov-2026 12:14';
 document.title = 'CCG W&B v' + APP_VERSION;
 </script>
 </body>
