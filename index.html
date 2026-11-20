@@ -243,7 +243,10 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
 .favpop{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.35);display:flex;align-items:flex-start;justify-content:center;padding-top:70px}
 .favpop[hidden]{display:none}
 .favpop.anchored{display:block;padding:0}
-.favpop.anchored .favpanel{position:absolute}
+.favpop.anchored .favpanel,.favpop.anchored .favdlg{position:absolute;margin:0}
+.favdlg.pointer{border:3px solid #1aa6d6;overflow:visible}
+.favdlg.pointer::before{content:'';position:absolute;top:-11px;left:var(--caret,24px);width:16px;height:16px;background:var(--card);border-left:3px solid #1aa6d6;border-top:3px solid #1aa6d6;transform:rotate(45deg)}
+.favdlg{position:relative}
 .favpanel::before{content:'';position:absolute;top:-11px;left:var(--caret,24px);width:16px;height:16px;background:var(--card);border-left:3px solid #1aa6d6;border-top:3px solid #1aa6d6;transform:rotate(45deg)}
 .favpop:not(.anchored) .favpanel::before{display:none}
 .favpanel{position:relative;overflow:visible!important;width:min(430px,94vw);max-height:80vh;display:flex;flex-direction:column;background:var(--card);color:var(--ink);border-radius:14px;border:3px solid #1aa6d6;overflow:hidden}
@@ -269,7 +272,7 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
 .favdlg input[hidden]{display:none}
 .favdlgbtns{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
 .favdlgbtns .primary{background:#1f5fbf;color:#fff;border-color:#0d356f}
-.favdlgbtns .danger{color:#c0262d}
+.favdlgbtns .danger{background:#c0262d;color:#fff;border-color:#7d1218}
 #printView{display:none}
 .exportbtn{min-height:40px;font-weight:600}
 @media print{
@@ -523,8 +526,9 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
 
 <script>
 // ---------- Version (raise by 0.01 for every implemented change) ----------
-const APP_VERSION = '0.40';
+const APP_VERSION = '0.41';
 const CHANGELOG = [
+  ['0.41', '20-Nov-2026', 'Save / rename favourite window opens under the ★ button, like the favourites list under ★🕘.'],
   ['0.40', '19-Nov-2026', '412 pilot seat selector: Left (longline) on the left, Right (normal) on the right.'],
   ['0.39', '19-Nov-2026', 'Favourites list button: clock emoji replaced with a line clock icon.'],
   ['0.38', '19-Nov-2026', 'Favourites: saving or renaming under a name that already exists asks before replacing that favourite.'],
@@ -1606,7 +1610,8 @@ function updateFavStar(){
 }
 
 // Small dialog: title, note, optional name field, buttons [[label, cls, fn(name)]]
-function favDialog(title, note, name, buttons){
+function favDialog(title, note, name, buttons, anchor){
+  favDlgAnchor = anchor || null;
   $('favDlgTitle').textContent = title; $('favDlgNote').textContent = note || ''; $('favDlgNote').hidden = !note;
   const inp = $('favDlgName'); inp.hidden = name === null; inp.value = name || '';
   const box = $('favDlgBtns'); box.innerHTML = '';
@@ -1615,7 +1620,7 @@ function favDialog(title, note, name, buttons){
     b.onclick = () => { const v = inp.value.trim(); if (fn && fn(v) === false) return; $('favDlg').hidden = true; };
     box.appendChild(b);
   }
-  $('favDlg').hidden = false;
+  $('favDlg').hidden = false; placeFavDlg();
   if (name !== null) setTimeout(()=>inp.focus(), 30);
 }
 function saveFavourite(name, replaceName){
@@ -1629,7 +1634,7 @@ function guardOverwrite(name, except, doIt){
   if (!name){ alertNote('Type a name for the favourite.'); return false; }
   if (name !== except && favLoad('fav').some(f=>f.name===name)){
     favDialog('Replace favourite?', `“${name}” already exists for ${TAIL.reg}. Replace it with these settings?`, null,
-      [['Cancel','',null], ['Replace','danger',()=>{ doIt(); }]]);
+      [['Cancel','',null], ['Replace','danger',()=>{ doIt(); }]], favDlgAnchor);
     return false;
   }
   return doIt();
@@ -1644,13 +1649,13 @@ $('favBtn').onclick = () => {
       ['Rename', 'primary', v => guardOverwrite(v, f.name, () => {
         favStore('fav', favLoad('fav').filter(x=>x.name!==v || x.name===f.name).map(x=>x.name===f.name ? {...x, name:v} : x));
         if (lastRecalled===f.name) lastRecalled = v; updateFavStar(); if (!$('favPop').hidden) drawFavList(); })]
-    ]);
+    ], $('favBtn'));
   } else {
     const prev = lastRecalled && favLoad('fav').find(x=>x.name===lastRecalled);
     const btns = [['Cancel', '', null]];
     if (prev) btns.push([`Update “${prev.name}”`, '', () => saveFavourite(prev.name)]);
     btns.push(['Save', 'primary', v => guardOverwrite(v, null, () => saveFavourite(v))]);
-    favDialog(`Save favourite for ${TAIL.reg}`, prev ? `Changed since “${prev.name}” was recalled. Update it, or save these settings under a new name.` : 'Saves the load sheet, addendums, temporary changes, operational gear and fuel for this aircraft.', '', btns);
+    favDialog(`Save favourite for ${TAIL.reg}`, prev ? `Changed since “${prev.name}” was recalled. Update it, or save these settings under a new name.` : 'Saves the load sheet, addendums, temporary changes, operational gear and fuel for this aircraft.', '', btns, $('favBtn'));
   }
 };
 
@@ -1701,16 +1706,24 @@ function drawFavList(){
   });
 }
 // The list opens just under the ★🕘 button, with a caret pointing at it
-function placeFavPop(){
-  const pop = $('favPop'), panel = pop.querySelector('.favpanel'), r = $('favListBtn').getBoundingClientRect();
-  const w = panel.offsetWidth || 430, left = Math.max(8, Math.min(r.left - 12, window.innerWidth - w - 8));
+function anchorPanel(pop, panel, btn, defW){
+  const r = btn.getBoundingClientRect();
+  const w = panel.offsetWidth || defW, left = Math.max(8, Math.min(r.left - 12, window.innerWidth - w - 8));
   pop.classList.add('anchored');
   panel.style.left = left + 'px'; panel.style.top = (r.bottom + 12) + 'px';
   panel.style.maxHeight = Math.max(240, window.innerHeight - r.bottom - 24) + 'px';
   panel.style.setProperty('--caret', Math.max(14, Math.min(w - 30, r.left + r.width/2 - left - 8)) + 'px');
 }
+function placeFavPop(){ const pop = $('favPop'); anchorPanel(pop, pop.querySelector('.favpanel'), $('favListBtn'), 430); }
+// Dialogs from the ★ button open just under it, like the list does under ★🕘
+let favDlgAnchor = null;
+function placeFavDlg(){
+  const pop = $('favDlg'), dlg = pop.querySelector('.favdlg');
+  if (favDlgAnchor){ dlg.classList.add('pointer'); anchorPanel(pop, dlg, favDlgAnchor, 400); }
+  else { pop.classList.remove('anchored'); dlg.classList.remove('pointer'); dlg.style.left = dlg.style.top = dlg.style.maxHeight = ''; }
+}
 $('favListBtn').onclick = () => { favEditing = false; $('favFilter').value=''; drawFavList(); $('favPop').hidden = false; placeFavPop(); };
-window.addEventListener('resize', () => { if (!$('favPop').hidden) placeFavPop(); });
+window.addEventListener('resize', () => { if (!$('favPop').hidden) placeFavPop(); if (!$('favDlg').hidden) placeFavDlg(); });
 $('favClose').onclick = () => { $('favPop').hidden = true; };
 $('favPop').onclick = e => { if (e.target.id==='favPop') $('favPop').hidden = true; };
 $('favDlg').onclick = e => { if (e.target.id==='favDlg') $('favDlg').hidden = true; };
@@ -1781,7 +1794,7 @@ function applyTail(typeChanged){
 sel.onchange = () => { pushRecent(); lastRecalled = null; applyTail(loadTail(sel.value)); };
 for (const r of document.querySelectorAll('input[name=pside]')) r.onchange = () => { S.pilotSide = r.value; render(); };
 applyTail(true);
-$('verTag').textContent = 'v' + APP_VERSION + ' · built 19-Nov-2026 20:35';
+$('verTag').textContent = 'v' + APP_VERSION + ' · built 20-Nov-2026 06:28';
 document.title = 'CCG W&B v' + APP_VERSION;
 </script>
 </body>
