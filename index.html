@@ -533,8 +533,9 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
 
 <script>
 // ---------- Version (raise by 0.01 for every implemented change) ----------
-const APP_VERSION = '0.48';
+const APP_VERSION = '0.49';
 const CHANGELOG = [
+  ['0.49', '20-Nov-2026', 'Vertical reference door bubble turned a few degrees so its base follows the door frame.'],
   ['0.48', '20-Nov-2026', 'Vertical reference door drawn as a domed bubble (shaded, with highlights) instead of an ellipse.'],
   ['0.47', '20-Nov-2026', 'Vertical reference door bubble drawn wider.'],
   ['0.46', '20-Nov-2026', '412 bear paws drawn larger and further aft, reaching past the aft end of the skid tubes.'],
@@ -684,7 +685,7 @@ const T429 = {
   // Dart bear paws on the aft skid tubes (arm from the removal addendum: 6,327 / 22.2 = FS 285); half-width in inches
   bearPaws:{fs:285, x:[71.5,448.5], hw:7, letter:/remove.*bear ?paws/i, shownWhen:'out'},
   // Vertical reference (bubble) door replaces the pilot crew door (right side)
-  vrDoor:{edge:378, cy:305, w:30, ry:62, side:1, letter:/vert(ical)? ?ref.*door/i, shownWhen:'in'},
+  vrDoor:{edge:378, cy:305, w:30, ry:62, side:1, rot:-4, letter:/vert(ical)? ?ref.*door/i, shownWhen:'in'},
   // listed front to back; the sliding door stays the default (defaultDoor)
   // co-pilot crew door: exit from the forward toe step of the skid, FS 154 measured on the RFM station diagram; no door-open moment correction in the workbook
   doors:[{id:'copilot', label:'Co-pilot crew door (FS 154)', fs:154, corr:0}, {id:'hinged', label:'Hinged passenger door (FS 190)', fs:190, corr:-240}, {id:'sliding', label:'Sliding passenger door (FS 220)', fs:220, corr:924}],
@@ -767,7 +768,7 @@ const T412 = {
   // plate reaches past the aft end of the skid tube (FS 182 in the drawing), as in the installation drawing.
   bearPaws:{fs:178.5, x:[31,487], hw:8, letter:/remove.*bear ?paws/i, shownWhen:'out'},
   // Dart vertical reference (bubble) door on the left crew door, fitted unless "Remove Dart VR Door" is in effect
-  vrDoor:{edge:114, cy:300, w:32, ry:70, side:-1, letter:/vr door/i, shownWhen:'out'},
+  vrDoor:{edge:114, cy:300, w:32, ry:70, side:-1, rot:5, letter:/vr door/i, shownWhen:'out'},
   doors:[{id:'crew', label:'Crew door (FS 47)', fs:47, corr:0}, {id:'sliding', label:'Sliding cabin door (FS 110)', fs:110, corr:3254.5}],
   env:{
     long: [[130,6500],[130,8800],[135.6,12200],[141.1,12200],[144,8800],[144,6500]],
@@ -990,7 +991,7 @@ function drawDiagram(){
     }
   }
   if (kitShown(T.vrDoor)){ // vertical reference door: a blister bubble standing out from the crew door (plan view)
-    const v = T.vrDoor, sd = v.side, e = v.edge, o = e + sd*v.w, vg = el('g',{class:'vrdoor','aria-hidden':'true'},svg);
+    const v = T.vrDoor, sd = v.side, e = v.edge, o = e + sd*v.w, vg = el('g',{class:'vrdoor','aria-hidden':'true',transform:`rotate(${v.rot||0} ${e} ${v.cy})`},svg);   // base parallel to the door frame (degrees, + = clockwise)
     const gid = 'vrGrad' + (sd>0?'R':'L'), defs = el('defs',{},vg);
     const gr = el('radialGradient',{id:gid, cx: sd>0?'.62':'.38', cy:'.34', r:'.75'},defs);
     for (const [off,col,op] of [['0','#ffffff','.95'],['.35','#bfeaf6','.9'],['.8','#6cc3dc','.88'],['1','#3d93ad','.9']]) el('stop',{offset:off,'stop-color':col,'stop-opacity':op},gr);
@@ -1866,7 +1867,7 @@ function applyTail(typeChanged){
 sel.onchange = () => { pushRecent(); lastRecalled = null; applyTail(loadTail(sel.value)); };
 for (const r of document.querySelectorAll('input[name=pside]')) r.onchange = () => { S.pilotSide = r.value; render(); };
 applyTail(true);
-$('verTag').textContent = 'v' + APP_VERSION + ' · built 20-Nov-2026 11:57';
+$('verTag').textContent = 'v' + APP_VERSION + ' · built 20-Nov-2026 12:00';
 document.title = 'CCG W&B v' + APP_VERSION;
 </script>
 </body>
