@@ -536,8 +536,9 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
 
 <script>
 // ---------- Version (raise by 0.01 for every implemented change) ----------
-const APP_VERSION = '0.55';
+const APP_VERSION = '0.56';
 const CHANGELOG = [
+  ['0.56', '21-Nov-2026', 'Addendum pictogram: camera pod redrawn from a photo of the MX-10.'],
   ['0.55', '21-Nov-2026', 'Addendum pictograms: cargo hook and litter kit redrawn from photos; crew door windows tinted, co-pilot door mirrored.'],
   ['0.54', '21-Nov-2026', 'Addendums tab: a pictogram beside each addendum (seat maps with the seat concerned filled in, hook, fuel pump, floats, bear paw, stretcher, etc.).'],
   ['0.53', '20-Nov-2026', 'BALANCE and LATERAL captions centred under their bars.'],
@@ -984,7 +985,9 @@ const ADD_ICONS = {
   litter:  [['r',0.8,7.8,22.4,8.4,2.6,0], ['f','M2.8 10.2L6 9.6H18L21.2 10.2V13.8L18 14.4H6L2.8 13.8Z','#f07a1e'], ['f','M8.2 8.6H9.8V15.4H8.2Z','#c62828'], ['f','M14.2 8.6H15.8V15.4H14.2Z','#c62828']],
   light:   [['p','M2 12H5.5',0], ['c',9.5,12,4,0], ['p','M15 8.5L20 6',0], ['p','M15.5 12H21.5',0], ['p','M15 15.5L20 18',0]],
   gauge:   [['c',12,13,8.5,0], ['p','M12 13L16.5 8.5',0], ['c',12,13,1.2,1], ['p','M6 13H7.5',0], ['p','M12 7V8.5',0], ['p','M18 13H16.5',0]],
-  camera:  [['r',9,2.5,6,3.5,1,0], ['p','M12 6V7',0], ['c',12,14,7,0], ['c',12,14,2.6,1]],
+  // MX-10 / video camera pod, from the photo: mounting plate, upper housing, turret ball with two glass windows and the green sensor window
+  camera:  [['f','M7.5 0.6H16.5V2.6H7.5Z',1], ['f','M4.2 3.2H19.8V8.4H4.2Z',1], ['p','M4.2 8.4V12.5',0], ['p','M19.8 8.4V12.5',0],
+            ['c',12,15,7.6,0], ['c',8.9,12.2,2,'#9bdcf0'], ['c',15.4,14.4,3,'#9bdcf0'], ['e',10.2,19.2,3,1.6,'#9ccc2e']],
   pin:     [['c',7,7,3.5,0], ['p','M9.5 9.5L20 20',0], ['p','M16.5 16.5L18.5 14.5',0]],
   eye:     [['p','M2.5 12C7 5.5 17 5.5 21.5 12C17 18.5 7 18.5 2.5 12Z',0], ['c',12,12,2.8,1]],
   antenna: [['p','M12 21.5V10.5',0], ['c',12,9,1.5,1], ['p','M8.3 5.5C6.6 7.3 6.6 10.7 8.3 12.5',0], ['p','M15.7 5.5C17.4 7.3 17.4 10.7 15.7 12.5',0], ['p','M5.2 3C2.3 6.2 2.3 11.8 5.2 15',0], ['p','M18.8 3C21.7 6.2 21.7 11.8 18.8 15',0], ['p','M9 21.5H15',0]],
@@ -1966,7 +1969,7 @@ function applyTail(typeChanged){
 sel.onchange = () => { pushRecent(); lastRecalled = null; applyTail(loadTail(sel.value)); };
 for (const r of document.querySelectorAll('input[name=pside]')) r.onchange = () => { S.pilotSide = r.value; render(); };
 applyTail(true);
-$('verTag').textContent = 'v' + APP_VERSION + ' · built 21-Nov-2026 09:59';
+$('verTag').textContent = 'v' + APP_VERSION + ' · built 21-Nov-2026 10:01';
 document.title = 'CCG W&B v' + APP_VERSION;
 </script>
 </body>
