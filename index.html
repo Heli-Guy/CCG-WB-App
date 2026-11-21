@@ -536,8 +536,9 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
 
 <script>
 // ---------- Version (raise by 0.01 for every implemented change) ----------
-const APP_VERSION = '0.54';
+const APP_VERSION = '0.55';
 const CHANGELOG = [
+  ['0.55', '21-Nov-2026', 'Addendum pictograms: cargo hook and litter kit redrawn from photos; crew door windows tinted, co-pilot door mirrored.'],
   ['0.54', '21-Nov-2026', 'Addendums tab: a pictogram beside each addendum (seat maps with the seat concerned filled in, hook, fuel pump, floats, bear paw, stretcher, etc.).'],
   ['0.53', '20-Nov-2026', 'BALANCE and LATERAL captions centred under their bars.'],
   ['0.52', '20-Nov-2026', 'Button caption: "Reset Addendums to EFB Default".'],
@@ -965,17 +966,22 @@ function buildLoads(opts={}){
 //   ['e', cx, cy, rx, ry, fill]       ellipse
 //   ['r', x, y, w, h, rx, fill]       rounded rectangle
 //   ['p', d, fill, evenodd?]          path: absolute M L H V C Q Z only
+//   ['f', d, fill]                    path filled only, no outline (for solid shapes)
 // fill: 0 = outline only, 1 = filled in the text colour, '#rrggbb' = that colour (outline still in the text colour).
 // Every element is stroked in the text colour (width 1.7), so icons follow light/dark mode and the chip state.
 const ADD_ICONS = {
-  hook:    [['c',12,4,2,0], ['p','M12 6V12.5C12 18.5 5.5 18.5 5.5 13.5L8.5 15.5',0]],
+  // helicopter cargo hook, from the photo: mounting lug on top, black body with the red manual release, hook and keeper below
+  hook:    [['r',9.5,1,5,3.5,1.2,0], ['f','M12 4.3L20.3 10.5L21.3 15.3H16.2C15 13 9.6 13 8.3 15.5L4.6 16.6L2.8 12Z',1], ['c',10,9.6,2,'#d92b2b'],
+            ['f','M3.6 15.6C3.8 23.2 15.8 24.6 21.6 17.6L19.6 16.4C15.4 21.2 7.6 20.6 7 15.2Z',1], ['p','M16.6 15.4L20.4 17',0]],
   fuel:    [['r',4,5,10,15,1.5,0], ['r',6.3,7.3,5.4,4,0.8,1], ['p','M14 8H16.5C18 8 19 9 19 10.5V17C19 18.6 16.8 18.6 16.8 17V13.5',0], ['p','M2.5 20.5H15.5',0]],
   floats:  [['r',2.5,7.5,19,9,4.5,'#f2c200']],
   bearpaw: [['p','M8.96 2H15.04L15.6 6.03L16.96 8.71L20 10.47V21.08L19.04 22H4.96L4 21.08V10.47L7.04 8.71L8.4 6.03Z M5.6 12.6H8.6V14.3H5.6Z M15.4 12.6H18.4V14.3H15.4Z M5.6 15.9H8.6V17.6H5.6Z M15.4 15.9H18.4V17.6H15.4Z','#16191d',1]],
   vrdoor:  [['r',4,3,11,18,2,0], ['p','M15 5.5C21.5 6.5 21.5 17.5 15 18.5Z','#9bdcf0']],
-  door:    [['r',6,3,12,18,2,0], ['r',8.5,5.5,7,6,1,0], ['p','M15 14.5H16.5',0]],
+  door:    [['r',6,3,12,18,2,0], ['r',8.5,5.5,7,6,1,'#9bdcf0'], ['p','M15 14.5H16.5',0]],   // pilot (right) crew door
+  doorL:   [['r',6,3,12,18,2,0], ['r',8.5,5.5,7,6,1,'#9bdcf0'], ['p','M9 14.5H7.5',0]],      // co-pilot (left) crew door, mirrored
   dual:    [['r',9.5,2.5,5,7.5,2.5,0], ['p','M12 10V20.5',0], ['p','M7.5 20.5H16.5',0]],
-  litter:  [['r',3.5,9,17,5,1.5,0], ['p','M1 11.5H3.5',0], ['p','M20.5 11.5H23',0], ['p','M7 14V18',0], ['p','M17 14V18',0], ['p','M12 9.8V13.2',0]],
+  // stretcher seen from above, from the photo: aluminium frame, orange bed tapered at the ends, two red straps
+  litter:  [['r',0.8,7.8,22.4,8.4,2.6,0], ['f','M2.8 10.2L6 9.6H18L21.2 10.2V13.8L18 14.4H6L2.8 13.8Z','#f07a1e'], ['f','M8.2 8.6H9.8V15.4H8.2Z','#c62828'], ['f','M14.2 8.6H15.8V15.4H14.2Z','#c62828']],
   light:   [['p','M2 12H5.5',0], ['c',9.5,12,4,0], ['p','M15 8.5L20 6',0], ['p','M15.5 12H21.5',0], ['p','M15 15.5L20 18',0]],
   gauge:   [['c',12,13,8.5,0], ['p','M12 13L16.5 8.5',0], ['c',12,13,1.2,1], ['p','M6 13H7.5',0], ['p','M12 7V8.5',0], ['p','M18 13H16.5',0]],
   camera:  [['r',9,2.5,6,3.5,1,0], ['p','M12 6V7',0], ['c',12,14,7,0], ['c',12,14,2.6,1]],
@@ -1019,7 +1025,7 @@ function addIconFor(desc, is412){
     }
     if (s.length) return {seats:s};
   }
-  const rules = [[/vert(ical)? ?ref|vr door/,'vrdoor'], [/crew door/,'door'], [/float/,'floats'], [/dual control/,'dual'],
+  const rules = [[/vert(ical)? ?ref|vr door/,'vrdoor'], [/c-pilot|co-pilot|copilot/,'doorL'], [/crew door/,'door'], [/float/,'floats'], [/dual control/,'dual'],
     [/aux fuel/,'fuel'], [/cargo hook/,'hook'], [/bear ?paw/,'bearpaw'], [/utility mount/,'light'], [/torque indicator/,'gauge'],
     [/video|camera|mx-?10/,'camera'], [/blade pin/,'pin'], [/spotter/,'eye'], [/vislink|downlink/,'antenna'],
     [/cargo net|stanchion/,'net'], [/crew step/,'step'], [/hoist/,'hoist'], [/ballast/,'ballast']];
@@ -1036,6 +1042,7 @@ function addIconSVG(desc, is412){
     if (el[0]==='c') body += `<circle cx="${el[1]}" cy="${el[2]}" r="${el[3]}" fill="${f(el[4])}"/>`;
     else if (el[0]==='e') body += `<ellipse cx="${el[1]}" cy="${el[2]}" rx="${el[3]}" ry="${el[4]}" fill="${f(el[5])}"/>`;
     else if (el[0]==='r') body += `<rect x="${el[1]}" y="${el[2]}" width="${el[3]}" height="${el[4]}" rx="${el[5]}" fill="${f(el[6])}"/>`;
+    else if (el[0]==='f') body += `<path d="${el[1]}" fill="${f(el[2])}" stroke="none"/>`;
     else body += `<path d="${el[1]}" fill="${f(el[2])}"${el[3]?' fill-rule="evenodd"':''}/>`;
   }
   const vb = k.seats ? '-0.5 -1 33 26' : '-4.5 -1 33 26';   // same width for every icon so the text lines up
@@ -1959,7 +1966,7 @@ function applyTail(typeChanged){
 sel.onchange = () => { pushRecent(); lastRecalled = null; applyTail(loadTail(sel.value)); };
 for (const r of document.querySelectorAll('input[name=pside]')) r.onchange = () => { S.pilotSide = r.value; render(); };
 applyTail(true);
-$('verTag').textContent = 'v' + APP_VERSION + ' · built 21-Nov-2026 09:46';
+$('verTag').textContent = 'v' + APP_VERSION + ' · built 21-Nov-2026 09:59';
 document.title = 'CCG W&B v' + APP_VERSION;
 </script>
 </body>
