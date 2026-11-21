@@ -89,6 +89,7 @@ th{font-size:12px;color:var(--muted);font-weight:600}
 .pTO{fill:#d0202a;stroke:#fff;stroke-width:1.5}.pL{fill:var(--card);stroke:var(--ink);stroke-width:2}.pZ{fill:#21b14b;stroke:#fff;stroke-width:1.5}
 .out .burn{stroke:var(--bad);stroke-dasharray:6 4;stroke-width:3}
 .legend{font-size:11.5px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap;margin-top:6px}
+.gear .gname{display:flex;align-items:center;gap:8px}
 .gear{display:grid;grid-template-columns:minmax(150px,1fr) 46px auto;gap:6px 10px;align-items:center;font-size:14px}
 .seg{display:grid;grid-template-columns:repeat(4,86px);border:1px solid var(--line);border-radius:9px;overflow:hidden}
 .seg label{display:flex;align-items:center;justify-content:center;min-height:38px;font-size:12.5px;cursor:pointer;border-left:1px solid var(--line);color:var(--ink);background:var(--card);text-align:center;padding:0 4px}
@@ -536,8 +537,9 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
 
 <script>
 // ---------- Version (raise by 0.01 for every implemented change) ----------
-const APP_VERSION = '0.58';
+const APP_VERSION = '0.59';
 const CHANGELOG = [
+  ['0.59', '21-Nov-2026', 'Operational gear tab: a pictogram beside each item (axe, ladder, fuel pump, rifle, sat phone, snowshoes, nets, tie-downs, tool boxes, sleeping bags, survival kits, covers).'],
   ['0.58', '21-Nov-2026', 'Two fuel pumps for an addendum that installs both L/H and R/H aux tanks (412).'],
   ['0.57', '21-Nov-2026', 'Crew door and VR door pictograms drawn in the shape of the 429 doors (pilot door nose right, co-pilot door nose left).'],
   ['0.56', '21-Nov-2026', 'Addendum pictogram: camera pod redrawn from a photo of the MX-10.'],
@@ -1003,7 +1005,28 @@ const ADD_ICONS = {
   step:    [['p','M3 20H9V15H15V10H21',0], ['p','M3 20V21.5',0]],
   hoist:   [['r',5,2.5,14,5,2,0], ['p','M12 7.5V14.5',0], ['p','M8 14.5H16L14.5 21H9.5Z',0]],
   ballast: [['c',12,5.5,2.5,0], ['p','M6.5 9H17.5L21 21H3Z',0]],
+  // ---- Operational gear ----
+  axe:      [['p','M5 21.5L15.5 7',0], ['f','M12.6 4.2L19.8 6.4C20.6 9 19.6 11.6 17.6 12.6L12 8.6Z',1]],
+  ladder:   [['p','M7 1.5V22.5',0], ['p','M17 1.5V22.5',0], ['p','M7 6H17',0], ['p','M7 11H17',0], ['p','M7 16H17',0], ['p','M7 21H17',0]],
+  gun:      [['f','M1.5 9.4H17.2L18.8 8H22.6V11.6L19.8 12.2L18.2 13.6H11.4L9.8 18.2H5.8L7.2 13.6H1.5Z',1], ['p','M11.6 13.6C11.6 15.4 13.6 15.6 14.2 13.6',0]],
+  phone:    [['r',7,7,10,15,2,0], ['p','M14.5 7V1.8',0], ['r',9,9.4,6,4.2,0.8,'#9bdcf0'], ['p','M9.6 16.6H14.4',0], ['p','M9.6 19.2H14.4',0]],
+  snowshoe: [['e',7.5,12,4.2,9.6,0], ['e',16.5,12,4.2,9.6,0], ['p','M4 9.5H11',0], ['p','M4 14H11',0], ['p','M13 9.5H20',0], ['p','M13 14H20',0]],
+  strap:    [['r',1.5,10.5,21,3,1,0], ['r',8.5,7.5,7,9,1.6,1], ['p','M1.5 12C-0.5 12 -0.5 16.2 1.8 16.2',0], ['p','M22.5 12C24.5 12 24.5 16.2 22.2 16.2',0]],
+  toolbox:  [['r',2.5,9,19,12,1.6,0], ['p','M8.5 9V6.2C8.5 5.5 9 5 9.7 5H14.3C15 5 15.5 5.5 15.5 6.2V9',0], ['p','M2.5 13.8H21.5',0], ['r',10.2,12.3,3.6,3,0.6,1]],
+  bag:      [['p','M7 21.5V8C7 4.6 9.2 2.5 12 2.5C14.8 2.5 17 4.6 17 8V21.5Z','#5b8bd0'], ['p','M8.6 8.8C10.6 7.4 13.4 7.4 15.4 8.8',0], ['p','M12 11.5V20',0]],
+  survival: [['r',2.5,8,19,13,2.2,'#f07a1e'], ['p','M8.8 8V5.6C8.8 5 9.3 4.5 9.9 4.5H14.1C14.7 4.5 15.2 5 15.2 5.6V8',0], ['f','M11 10.6H13V13.5H15.9V15.5H13V18.4H11V15.5H8.1V13.5H11Z','#ffffff']],
+  cover:    [['p','M3 17.5C4.8 10 8 5 12 5C16 5 19.2 10 21 17.5C18 19.6 15.4 16 12 18C8.6 20 6 15.6 3 17.5Z',0], ['p','M12 5V8',0], ['p','M8 9.2C9.5 11 10.5 14 10.8 17.6',0], ['p','M16 9.2C14.5 11 13.5 14 13.2 17.6',0]],
 };
+// ---- Operational gear: which icon an item gets, from its name ----
+function gearIconFor(name){
+  const d = name.toLowerCase();
+  const rules = [[/axe|saw/,'axe'], [/ladder/,'ladder'], [/fuel pump/,'fuel'], [/gun/,'gun'], [/sat phone|phone/,'phone'],
+    [/snowshoe/,'snowshoe'], [/barrier|net/,'net'], [/tie-?down/,'strap'], [/tool|spare box|dimmits|multimeter/,'toolbox'],
+    [/sleeping bag/,'bag'], [/survival/,'survival'], [/cover/,'cover']];
+  for (const [re, icon] of rules) if (re.test(d)) return {icon};
+  return null;
+}
+function gearIconSVG(name){ return iconSVG(gearIconFor(name), false); }
 // Seat map icons, drawn in a wider 32 x 24 box (nose up, left on the left): a hollow dot for every seat position in
 // the cabin, a full dot for the one(s) the addendum covers.
 const SEAT_MAPS = {
@@ -1045,8 +1068,9 @@ function addIconFor(desc, is412){
   for (const [re, icon] of rules) if (re.test(d)) return {icon};
   return null;
 }
-function addIconSVG(desc, is412){
-  const k = addIconFor(desc, is412); if (!k) return '<span class="aicon"></span>';
+function addIconSVG(desc, is412){ return iconSVG(addIconFor(desc, is412), is412); }
+function iconSVG(k, is412){
+  if (!k) return '<span class="aicon"></span>';
   const f = v => v === 0 ? 'none' : v === 1 ? 'currentColor' : v;
   let body = '';
   if (k.seats){
@@ -1531,7 +1555,7 @@ function drawEW(r){
 function drawGear(){
   const box = $('gear'); box.innerHTML=''; box.classList.toggle('many', T.gearOpts.length>4);
   GEARLIST.forEach((g,i)=>{
-    const n=document.createElement('div'); n.textContent=g.n;
+    const n=document.createElement('div'); n.className='gname'; n.innerHTML=gearIconSVG(g.n)+'<span></span>'; n.lastChild.textContent=g.n;
     const w=document.createElement('div'); w.textContent=g.w+' lb'; w.style.color='var(--muted)';
     const s=document.createElement('div'); s.className='seg'+(g.inst?' two':(T.gearOpts.length===8?' eight':'')); s.setAttribute('role','radiogroup'); s.setAttribute('aria-label',g.n+' location');
     const opts = g.inst ? [['Not on board','Not on board'],['Installed','Installed']] : T.gearOpts;
@@ -1979,7 +2003,7 @@ function applyTail(typeChanged){
 sel.onchange = () => { pushRecent(); lastRecalled = null; applyTail(loadTail(sel.value)); };
 for (const r of document.querySelectorAll('input[name=pside]')) r.onchange = () => { S.pilotSide = r.value; render(); };
 applyTail(true);
-$('verTag').textContent = 'v' + APP_VERSION + ' · built 21-Nov-2026 10:08';
+$('verTag').textContent = 'v' + APP_VERSION + ' · built 21-Nov-2026 10:12';
 document.title = 'CCG W&B v' + APP_VERSION;
 </script>
 </body>
