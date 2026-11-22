@@ -537,8 +537,9 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
 
 <script>
 // ---------- Version (raise by 0.01 for every implemented change) ----------
-const APP_VERSION = '0.63';
+const APP_VERSION = '0.64';
 const CHANGELOG = [
+  ['0.64', '22-Nov-2026', '412 "Remove Dart VR Door and Install OEM Door": plain left door pictogram, no removal stripe.'],
   ['0.63', '22-Nov-2026', 'Left-hand aux fuel tank pictogram mirrored (nozzle on the left).'],
   ['0.62', '22-Nov-2026', 'Addendum pictograms: seats added in green, removed in red; a red diagonal stripe on every other removal.'],
   ['0.61', '21-Nov-2026', 'Shotgun pictogram traced from the reference picture.'],
@@ -1048,6 +1049,8 @@ const SEAT_R = 3;
 const isRemoval = desc => /^\s*rem(ove)?\b/i.test(desc);
 const SEAT_ADD = '#2e9e48', SEAT_REM = '#d93636';
 function addIconFor(desc, is412){
+  // "Remove Dart VR Door and Install OEM Door" puts the regular door back: show the plain left door, no stripe
+  if (/vr door/i.test(desc) && /install oem door/i.test(desc)) return {icon:'doorL', remove:false};
   const k = addIconKind(desc, is412);
   return k ? {...k, remove: isRemoval(desc)} : null;
 }
@@ -2024,7 +2027,7 @@ function applyTail(typeChanged){
 sel.onchange = () => { pushRecent(); lastRecalled = null; applyTail(loadTail(sel.value)); };
 for (const r of document.querySelectorAll('input[name=pside]')) r.onchange = () => { S.pilotSide = r.value; render(); };
 applyTail(true);
-$('verTag').textContent = 'v' + APP_VERSION + ' · built 22-Nov-2026 14:30';
+$('verTag').textContent = 'v' + APP_VERSION + ' · built 22-Nov-2026 14:33';
 document.title = 'CCG W&B v' + APP_VERSION;
 </script>
 </body>
