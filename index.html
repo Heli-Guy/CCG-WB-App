@@ -537,8 +537,9 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
 
 <script>
 // ---------- Version (raise by 0.01 for every implemented change) ----------
-const APP_VERSION = '0.61';
+const APP_VERSION = '0.62';
 const CHANGELOG = [
+  ['0.62', '22-Nov-2026', 'Addendum pictograms: seats added in green, removed in red; a red diagonal stripe on every other removal.'],
   ['0.61', '21-Nov-2026', 'Shotgun pictogram traced from the reference picture.'],
   ['0.60', '21-Nov-2026', 'Gear pictograms: shotgun, multimeter for the Dimmits & multimeter box, yellow survival kit.'],
   ['0.59', '21-Nov-2026', 'Operational gear tab: a pictogram beside each item (axe, ladder, fuel pump, rifle, sat phone, snowshoes, nets, tie-downs, tool boxes, sleeping bags, survival kits, covers).'],
@@ -1040,7 +1041,14 @@ const SEAT_MAPS = {
 const SEAT_R = 3;
 // Which icon an addendum gets, from its description (letters differ between aircraft, descriptions do not).
 // Order matters: litter before seats (the 429 litter kit mentions seats), aux fuel before cargo net.
+// Removals ("Remove ...", "Rem ...") show red seat dots or a red diagonal stripe; additions show green seat dots.
+const isRemoval = desc => /^\s*rem(ove)?\b/i.test(desc);
+const SEAT_ADD = '#2e9e48', SEAT_REM = '#d93636';
 function addIconFor(desc, is412){
+  const k = addIconKind(desc, is412);
+  return k ? {...k, remove: isRemoval(desc)} : null;
+}
+function addIconKind(desc, is412){
   const d = desc.toLowerCase();
   if (/litter/.test(d)) return {icon:'litter'};
   if (/seat/.test(d)){
@@ -1078,7 +1086,11 @@ function iconSVG(k, is412){
   const f = v => v === 0 ? 'none' : v === 1 ? 'currentColor' : v;
   let body = '';
   if (k.seats){
-    for (const [p,[x,y]] of Object.entries(SEAT_MAPS[is412?412:429])) body += `<circle cx="${x}" cy="${y}" r="${SEAT_R}" fill="${k.seats.includes(p)?'currentColor':'none'}" stroke-width="1.5"/>`;
+    const c = k.remove ? SEAT_REM : SEAT_ADD;   // seat added = green, removed = red
+    for (const [p,[x,y]] of Object.entries(SEAT_MAPS[is412?412:429])){
+      const on = k.seats.includes(p);
+      body += `<circle cx="${x}" cy="${y}" r="${SEAT_R}" fill="${on?c:'none'}" stroke="${on?c:'currentColor'}" stroke-width="1.5"/>`;
+    }
   } else for (const el of ADD_ICONS[k.icon]){
     if (el[0]==='c') body += `<circle cx="${el[1]}" cy="${el[2]}" r="${el[3]}" fill="${f(el[4])}"/>`;
     else if (el[0]==='e') body += `<ellipse cx="${el[1]}" cy="${el[2]}" rx="${el[3]}" ry="${el[4]}" fill="${f(el[5])}"/>`;
@@ -1086,6 +1098,7 @@ function iconSVG(k, is412){
     else if (el[0]==='f') body += `<path d="${el[1]}" fill="${f(el[2])}" stroke="none"/>`;
     else body += `<path d="${el[1]}" fill="${f(el[2])}"${el[3]?' fill-rule="evenodd"':''}/>`;
   }
+  if (k.remove && !k.seats) body += `<path d="M-1.5 0.5L25.5 23.5" stroke="${SEAT_REM}" stroke-width="2.6" fill="none"/>`;   // removal stripe
   const vb = k.seats ? '-0.5 -1 33 26' : '-4.5 -1 33 26';   // same width for every icon so the text lines up
   return `<svg class="aicon" viewBox="${vb}" aria-hidden="true" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`;
 }
@@ -2007,7 +2020,7 @@ function applyTail(typeChanged){
 sel.onchange = () => { pushRecent(); lastRecalled = null; applyTail(loadTail(sel.value)); };
 for (const r of document.querySelectorAll('input[name=pside]')) r.onchange = () => { S.pilotSide = r.value; render(); };
 applyTail(true);
-$('verTag').textContent = 'v' + APP_VERSION + ' · built 21-Nov-2026 10:37';
+$('verTag').textContent = 'v' + APP_VERSION + ' · built 22-Nov-2026 10:41';
 document.title = 'CCG W&B v' + APP_VERSION;
 </script>
 </body>
