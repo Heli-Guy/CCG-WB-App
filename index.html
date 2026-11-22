@@ -537,8 +537,9 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
 
 <script>
 // ---------- Version (raise by 0.01 for every implemented change) ----------
-const APP_VERSION = '0.62';
+const APP_VERSION = '0.63';
 const CHANGELOG = [
+  ['0.63', '22-Nov-2026', 'Left-hand aux fuel tank pictogram mirrored (nozzle on the left).'],
   ['0.62', '22-Nov-2026', 'Addendum pictograms: seats added in green, removed in red; a red diagonal stripe on every other removal.'],
   ['0.61', '21-Nov-2026', 'Shotgun pictogram traced from the reference picture.'],
   ['0.60', '21-Nov-2026', 'Gear pictograms: shotgun, multimeter for the Dimmits & multimeter box, yellow survival kit.'],
@@ -982,6 +983,8 @@ const ADD_ICONS = {
   hook:    [['r',9.5,1,5,3.5,1.2,0], ['f','M12 4.3L20.3 10.5L21.3 15.3H16.2C15 13 9.6 13 8.3 15.5L4.6 16.6L2.8 12Z',1], ['c',10,9.6,2,'#d92b2b'],
             ['f','M3.6 15.6C3.8 23.2 15.8 24.6 21.6 17.6L19.6 16.4C15.4 21.2 7.6 20.6 7 15.2Z',1], ['p','M16.6 15.4L20.4 17',0]],
   fuel:    [['r',4,5,10,15,1.5,0], ['r',6.3,7.3,5.4,4,0.8,1], ['p','M14 8H16.5C18 8 19 9 19 10.5V17C19 18.6 16.8 18.6 16.8 17V13.5',0], ['p','M2.5 20.5H15.5',0]],
+  // left-hand aux tank: pump mirrored, nozzle on the left
+  fuelL:   [['r',10,5,10,15,1.5,0], ['r',12.3,7.3,5.4,4,0.8,1], ['p','M10 8H7.5C6 8 5 9 5 10.5V17C5 18.6 7.2 18.6 7.2 17V13.5',0], ['p','M21.5 20.5H8.5',0]],
   // both aux tanks (L/H and R/H) in one addendum: two smaller pumps
   fuel2:   [['r',-2.5,7.5,7,12,1.2,0], ['r',-1,9,4,2.6,0.5,1], ['p','M4.5 9.8H5.6C6.5 9.8 7 10.4 7 11.3V16.4C7 17.5 5.6 17.5 5.6 16.4V14',0], ['p','M-3.3 19.5H5.3',0],
             ['r',12.0,7.5,7,12,1.2,0], ['r',13.5,9,4,2.6,0.5,1], ['p','M19.0 9.8H20.1C21.0 9.8 21.5 10.4 21.5 11.3V16.4C21.5 17.5 20.1 17.5 20.1 16.4V14',0], ['p','M11.2 19.5H19.8',0]],
@@ -1073,6 +1076,7 @@ function addIconKind(desc, is412){
   }
   if (/vert(ical)? ?ref|vr door/.test(d)) return {icon: is412 ? 'vrdoorL' : 'vrdoor'};   // 429 pilot door (right), 412 left door
   if (/aux fuel/.test(d) && /l\/h\s*&\s*r\/h|both/.test(d)) return {icon:'fuel2'};   // both tanks in one addendum
+  if (/aux fuel/.test(d) && /l\/h/.test(d)) return {icon:'fuelL'};                     // left tank: nozzle on the left
   const rules = [ [/c-pilot|co-pilot|copilot/,'doorL'], [/crew door/,'door'], [/float/,'floats'], [/dual control/,'dual'],
     [/aux fuel/,'fuel'], [/cargo hook/,'hook'], [/bear ?paw/,'bearpaw'], [/utility mount/,'light'], [/torque indicator/,'gauge'],
     [/video|camera|mx-?10/,'camera'], [/blade pin/,'pin'], [/spotter/,'eye'], [/vislink|downlink/,'antenna'],
@@ -2020,7 +2024,7 @@ function applyTail(typeChanged){
 sel.onchange = () => { pushRecent(); lastRecalled = null; applyTail(loadTail(sel.value)); };
 for (const r of document.querySelectorAll('input[name=pside]')) r.onchange = () => { S.pilotSide = r.value; render(); };
 applyTail(true);
-$('verTag').textContent = 'v' + APP_VERSION + ' · built 22-Nov-2026 10:41';
+$('verTag').textContent = 'v' + APP_VERSION + ' · built 22-Nov-2026 14:30';
 document.title = 'CCG W&B v' + APP_VERSION;
 </script>
 </body>
