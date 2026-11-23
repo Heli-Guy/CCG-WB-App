@@ -378,7 +378,6 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
   <span class="pill okp" id="srcPill"></span>
   <span class="pill" id="datePill"></span>
   <span class="spacer"></span>
-  <span class="pill" id="envPill">Envelope: FMS-11 internal 7,500 lb</span>
   <span class="pill" id="addPill" title="Addendums in effect (orange = field change on this iPad, struck through = removed in the field)"></span>
   <nav class="tabs" role="tablist"><button role="tab" id="tbLoad" aria-selected="true">Load Sheet</button><button role="tab" id="tbAdd" aria-selected="false">Addendums</button><button role="tab" id="tbTemp" aria-selected="false">Temp Changes</button><button role="tab" id="tbGear" aria-selected="false">Operational Gear</button><button role="tab" id="tbSum" aria-selected="false">Summary Sheet</button><button role="tab" id="tbCalc" aria-selected="false">Calculation Sheet</button></nav>
 </header>
@@ -457,6 +456,7 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
     <section class="card">
       <div id="statusBox" class="status ok">Within limits</div>
       <ul class="msgs" id="msgs"></ul>
+      <div class="note" id="envNote"></div>
     </section>
     <section class="card">
       <h2>Basic empty weight — config ‘A’</h2>
@@ -539,8 +539,9 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
 
 <script>
 // ---------- Version (raise by 0.01 for every implemented change) ----------
-const APP_VERSION = '0.65';
+const APP_VERSION = '0.66';
 const CHANGELOG = [
+  ['0.66', '23-Nov-2026', 'Envelope pill removed from the header; the envelope in use is shown on the Summary tab (and, as before, on the Calculation Sheet and the PDF).'],
   ['0.65', '23-Nov-2026', 'Header: "Addendums in effect" pill on every tab (field changes in orange, removed ones struck through).'],
   ['0.64', '22-Nov-2026', '412 "Remove Dart VR Door and Install OEM Door": plain left door pictogram, no removal stripe.'],
   ['0.63', '22-Nov-2026', 'Left-hand aux fuel tank pictogram mirrored (nozzle on the left).'],
@@ -1377,7 +1378,7 @@ function render(){
   $('mfdW').textContent = fmt(r.takeoff.w,0); $('mfdLon').textContent = fmt(r.takeoff.cg,1); $('mfdLat').textContent = (r.takeoff.lat>=0?'+':'')+fmt(r.takeoff.lat,2);
   drawBalance(c, cgOK);
   $('msgs').innerHTML = v.msgs.map(m=>`<li>${m}</li>`).join('');
-  $('envPill').textContent = 'Envelope: ' + (env.ext ? T.envName.ext : T.envName.int);
+  $('envNote').innerHTML = '<b>Envelope:</b> ' + (env.ext ? T.envName.ext : T.envName.int);   // moved from the header
   // Addendums in effect, shown on every tab: orange = field change on this iPad, struck through = removed in the field
   const addIds = TAIL.addendums.map(a=>a.id).filter(id => has(id) || TAIL.inEffect.includes(id));
   $('addPill').innerHTML = 'Addendums in effect: ' + (addIds.length ? addIds.map(id => {
@@ -2036,7 +2037,7 @@ function applyTail(typeChanged){
 sel.onchange = () => { pushRecent(); lastRecalled = null; applyTail(loadTail(sel.value)); };
 for (const r of document.querySelectorAll('input[name=pside]')) r.onchange = () => { S.pilotSide = r.value; render(); };
 applyTail(true);
-$('verTag').textContent = 'v' + APP_VERSION + ' · built 23-Nov-2026 09:58';
+$('verTag').textContent = 'v' + APP_VERSION + ' · built 23-Nov-2026 10:04';
 document.title = 'CCG W&B v' + APP_VERSION;
 </script>
 </body>
