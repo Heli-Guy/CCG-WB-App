@@ -539,8 +539,9 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
 
 <script>
 // ---------- Version (raise by 0.01 for every implemented change) ----------
-const APP_VERSION = '0.66';
+const APP_VERSION = '0.67';
 const CHANGELOG = [
+  ['0.67', '23-Nov-2026', 'Summary tab and PDF: the envelope line adds "+ FMS-12 expanded RH lateral" when the right-side hover exit envelope is in use.'],
   ['0.66', '23-Nov-2026', 'Envelope pill removed from the header; the envelope in use is shown on the Summary tab (and, as before, on the Calculation Sheet and the PDF).'],
   ['0.65', '23-Nov-2026', 'Header: "Addendums in effect" pill on every tab (field changes in orange, removed ones struck through).'],
   ['0.64', '22-Nov-2026', '412 "Remove Dart VR Door and Install OEM Door": plain left door pictogram, no removal stripe.'],
@@ -1123,6 +1124,10 @@ const fmt = (n,d=1) => n.toLocaleString('en-CA',{minimumFractionDigits:d,maximum
 
 // A kit drawn on the diagram follows its addendum: shownWhen 'in' = drawn when the addendum is in effect,
 // 'out' = drawn unless it is in effect (e.g. "Remove Dart Bear Paws"). Not drawn if the workbook has no such addendum.
+// Envelope(s) in use, short form: base envelope, plus FMS-12 when the right-side hover exit expands the lateral limits
+function envLabel(env){
+  return (env.ext ? T.envName.ext : T.envName.int) + (env.hoist ? ' + FMS-12 expanded RH lateral (PIF-RW-2024-05-HQ)' : '');
+}
 function kitShown(k){
   if (!k) return false;
   const a = (TAIL.addendums||[]).find(x=>k.letter.test(x.desc));
@@ -1378,7 +1383,7 @@ function render(){
   $('mfdW').textContent = fmt(r.takeoff.w,0); $('mfdLon').textContent = fmt(r.takeoff.cg,1); $('mfdLat').textContent = (r.takeoff.lat>=0?'+':'')+fmt(r.takeoff.lat,2);
   drawBalance(c, cgOK);
   $('msgs').innerHTML = v.msgs.map(m=>`<li>${m}</li>`).join('');
-  $('envNote').innerHTML = '<b>Envelope:</b> ' + (env.ext ? T.envName.ext : T.envName.int);   // moved from the header
+  $('envNote').innerHTML = '<b>Envelope:</b> ' + envLabel(env);   // moved from the header
   // Addendums in effect, shown on every tab: orange = field change on this iPad, struck through = removed in the field
   const addIds = TAIL.addendums.map(a=>a.id).filter(id => has(id) || TAIL.inEffect.includes(id));
   $('addPill').innerHTML = 'Addendums in effect: ' + (addIds.length ? addIds.map(id => {
@@ -1706,7 +1711,7 @@ function buildPrintView(){
   // MFD panel
   const mfd = $('mfd').cloneNode(true); mfd.removeAttribute('id'); mfd.querySelectorAll('[id]').forEach(n=>n.removeAttribute('id'));
   const fuelKV = [['Takeoff fuel', `${fmt(S.fuel,0)} lb (${fmt(S.fuel/6.8,0)} gal)`], ['Landing fuel', `${fmt(S.lfuel,0)} lb`], ['Tanks', `${fmt(fullTail().fuelTable.at(-1).w,0)} lb — ${T.auxText()}`],
-    ['Hover exit door', doorOf().label.replace(/ \(FS.*\)/,'')], ['Envelope', c.env.ext ? T.envName.ext : T.envName.int]];
+    ['Hover exit door', doorOf().label.replace(/ \(FS.*\)/,'')], ['Envelope', envLabel(c.env)]];
   if (T.type==='Bell 412') fuelKV.push(['Pilot seat', S.pilotSide==='L' ? 'Left (longline)' : 'Right (normal)']);
   const kv = rows => `<div class="pv-kv">${rows.map(([k,x])=>`<div>${k}</div><div>${x}</div>`).join('')}</div>`;
   const {r} = c;
@@ -2037,7 +2042,7 @@ function applyTail(typeChanged){
 sel.onchange = () => { pushRecent(); lastRecalled = null; applyTail(loadTail(sel.value)); };
 for (const r of document.querySelectorAll('input[name=pside]')) r.onchange = () => { S.pilotSide = r.value; render(); };
 applyTail(true);
-$('verTag').textContent = 'v' + APP_VERSION + ' · built 23-Nov-2026 10:04';
+$('verTag').textContent = 'v' + APP_VERSION + ' · built 23-Nov-2026 11:57';
 document.title = 'CCG W&B v' + APP_VERSION;
 </script>
 </body>
