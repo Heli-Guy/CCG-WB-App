@@ -55,6 +55,7 @@ main{padding:14px;max-width:1400px;margin:0 auto}
 .chips{display:grid;grid-template-columns:1fr 1fr;grid-auto-flow:column;gap:6px}
 .chip{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:6px 9px;font-size:13px;cursor:pointer;min-height:36px;text-align:left;color:var(--ink)}
 .chip b{display:inline-block;width:18px;flex:none}
+#addPill b{font-weight:700}#addPill .addfc{color:#d97706}#addPill .addrm{text-decoration:line-through;text-decoration-thickness:2px}
 #addChips .chip{display:flex;align-items:center;gap:8px}
 .aicon{width:33px;height:26px;flex:none;display:inline-block}
 .chip.on{background:var(--chipon);border-color:var(--chiponb)}
@@ -378,6 +379,7 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
   <span class="pill" id="datePill"></span>
   <span class="spacer"></span>
   <span class="pill" id="envPill">Envelope: FMS-11 internal 7,500 lb</span>
+  <span class="pill" id="addPill" title="Addendums in effect (orange = field change on this iPad, struck through = removed in the field)"></span>
   <nav class="tabs" role="tablist"><button role="tab" id="tbLoad" aria-selected="true">Load Sheet</button><button role="tab" id="tbAdd" aria-selected="false">Addendums</button><button role="tab" id="tbTemp" aria-selected="false">Temp Changes</button><button role="tab" id="tbGear" aria-selected="false">Operational Gear</button><button role="tab" id="tbSum" aria-selected="false">Summary Sheet</button><button role="tab" id="tbCalc" aria-selected="false">Calculation Sheet</button></nav>
 </header>
 <main id="tabLoad" class="loadgrid">
@@ -537,8 +539,9 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
 
 <script>
 // ---------- Version (raise by 0.01 for every implemented change) ----------
-const APP_VERSION = '0.64';
+const APP_VERSION = '0.65';
 const CHANGELOG = [
+  ['0.65', '23-Nov-2026', 'Header: "Addendums in effect" pill on every tab (field changes in orange, removed ones struck through).'],
   ['0.64', '22-Nov-2026', '412 "Remove Dart VR Door and Install OEM Door": plain left door pictogram, no removal stripe.'],
   ['0.63', '22-Nov-2026', 'Left-hand aux fuel tank pictogram mirrored (nozzle on the left).'],
   ['0.62', '22-Nov-2026', 'Addendum pictograms: seats added in green, removed in red; a red diagonal stripe on every other removal.'],
@@ -1375,6 +1378,12 @@ function render(){
   drawBalance(c, cgOK);
   $('msgs').innerHTML = v.msgs.map(m=>`<li>${m}</li>`).join('');
   $('envPill').textContent = 'Envelope: ' + (env.ext ? T.envName.ext : T.envName.int);
+  // Addendums in effect, shown on every tab: orange = field change on this iPad, struck through = removed in the field
+  const addIds = TAIL.addendums.map(a=>a.id).filter(id => has(id) || TAIL.inEffect.includes(id));
+  $('addPill').innerHTML = 'Addendums in effect: ' + (addIds.length ? addIds.map(id => {
+    const m = TAIL.inEffect.includes(id), c = has(id);
+    return m === c ? `<b>${id}</b>` : `<b class="addfc${c?'':' addrm'}">${id}</b>`;
+  }).join(' ') : 'none');
   // results
   const row = (n,p) => `<tr><td>${n}</td><td>${fmt(p.w)}</td><td>${fmt(p.cg,2)}</td><td>${(p.lat>=0?'+':'')+fmt(p.lat,2)}</td></tr>`;
   $('results').innerHTML = row('Empty (as configured)',r.empty)+row('Zero fuel',r.zeroFuel)+row('Takeoff',r.takeoff)+(S.lfuel>0?row(`Landing (${fmt(S.lfuel,0)} lb fuel)`,r.landing):'');
@@ -2027,7 +2036,7 @@ function applyTail(typeChanged){
 sel.onchange = () => { pushRecent(); lastRecalled = null; applyTail(loadTail(sel.value)); };
 for (const r of document.querySelectorAll('input[name=pside]')) r.onchange = () => { S.pilotSide = r.value; render(); };
 applyTail(true);
-$('verTag').textContent = 'v' + APP_VERSION + ' · built 22-Nov-2026 14:33';
+$('verTag').textContent = 'v' + APP_VERSION + ' · built 23-Nov-2026 09:58';
 document.title = 'CCG W&B v' + APP_VERSION;
 </script>
 </body>
