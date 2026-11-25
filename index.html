@@ -182,9 +182,18 @@ details summary{cursor:pointer;font-size:13px;color:var(--accent);margin-top:4px
 .calcbar{display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin-bottom:12px}
 .calcbar input{font:inherit;font-size:16px;padding:7px 10px;border:1px solid var(--line);border-radius:8px}
 .btn{font:inherit;font-size:15px;padding:9px 14px;border-radius:9px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;min-height:40px}
-nav.tabs{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;order:10;flex-basis:100%;margin:2px 0 0}
-nav.tabs button{font:inherit;font-size:15px;line-height:1.15;padding:4px 6px;font-weight:500;border:1.5px solid var(--line);border-radius:8px;background:none;color:var(--muted);cursor:pointer;min-height:40px}
-nav.tabs button[aria-selected=true]{background:#1f5fbf;border-color:#0d356f;color:#fff;font-weight:700}
+/* Browser-style tab strip along the bottom of the header (same look as the 429 Performance app): the selected tab
+   takes the page colour and flows into the content below, with curved feet either side */
+nav.tabs{--strip:#dbe3ec;order:10;flex:0 0 calc(100% + 32px);box-sizing:border-box;display:flex;align-items:flex-end;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;gap:0;margin:2px -16px -10px;padding:8px 18px 0;background:var(--strip)}
+nav.tabs::-webkit-scrollbar{display:none}
+nav.tabs button{position:relative;flex:none;font:inherit;font-size:15px;border:0;background:transparent;border-radius:10px 10px 0 0;padding:10px 20px 11px;color:#3c4a57;cursor:pointer;white-space:nowrap}
+nav.tabs button[aria-selected=false]:hover{background:rgba(255,255,255,.45)}
+nav.tabs button[aria-selected=false]+button[aria-selected=false]::after{content:'';position:absolute;left:0;top:11px;bottom:11px;width:1px;background:rgba(0,0,0,.18)}
+nav.tabs button[aria-selected=true]{background:var(--bg);color:var(--ink);font-weight:600;z-index:1}
+nav.tabs button[aria-selected=true]::before,nav.tabs button[aria-selected=true]::after{content:'';position:absolute;bottom:0;width:12px;height:12px;pointer-events:none}
+nav.tabs button[aria-selected=true]::before{left:-12px;background:radial-gradient(circle at 0 0,transparent 11.5px,var(--bg) 12px)}
+nav.tabs button[aria-selected=true]::after{right:-12px;background:radial-gradient(circle at 100% 0,transparent 11.5px,var(--bg) 12px)}
+@media (prefers-color-scheme: dark){nav.tabs{--strip:#2a2d32}nav.tabs button{color:#a3acb7}nav.tabs button[aria-selected=false]:hover{background:rgba(255,255,255,.06)}nav.tabs button[aria-selected=false]+button[aria-selected=false]::after{background:rgba(255,255,255,.18)}}
 #tabCalc{max-width:1100px;margin:0 auto;padding:14px}
 .sumcol{display:grid;gap:14px;max-width:1100px}
 .loadgrid{display:grid;gap:14px;grid-template-columns:2fr 1fr;grid-template-areas:"diag mfd" "diag mid";align-items:start}
@@ -220,7 +229,8 @@ label.f.big input{font-size:24px;font-weight:600}
 .midcol .pside > span{display:block;margin-bottom:6px}
 .midcol .pside .seg.two{grid-template-columns:1fr 1fr}
 .mfd{min-width:0}
-@media (max-width:640px){nav.tabs{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:960px){nav.tabs{padding:8px 14px 0}nav.tabs button{padding:10px 12px 11px;font-size:14px}}
+@media (max-width:640px){nav.tabs button{padding:9px 9px 10px;font-size:13px}}
 .fuelrow{display:flex;gap:8px;align-items:flex-end}.fuelrow label.f.big{white-space:nowrap}.fuelrow label{flex:1;min-width:0}.fuelrow input{width:100%;min-width:0;box-sizing:border-box}
 .fillmax{font-weight:700;white-space:nowrap;min-height:50px;padding:0 14px}
 .fillnote{color:var(--accent);font-weight:600}
@@ -539,8 +549,9 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
 
 <script>
 // ---------- Version (raise by 0.01 for every implemented change) ----------
-const APP_VERSION = '0.67';
+const APP_VERSION = '0.68';
 const CHANGELOG = [
+  ['0.68', '25-Nov-2026', 'Tabs restyled as a browser-style tab strip, like the 429 Performance app.'],
   ['0.67', '23-Nov-2026', 'Summary tab and PDF: the envelope line adds "+ FMS-12 expanded RH lateral" when the right-side hover exit envelope is in use.'],
   ['0.66', '23-Nov-2026', 'Envelope pill removed from the header; the envelope in use is shown on the Summary tab (and, as before, on the Calculation Sheet and the PDF).'],
   ['0.65', '23-Nov-2026', 'Header: "Addendums in effect" pill on every tab (field changes in orange, removed ones struck through).'],
@@ -2042,7 +2053,7 @@ function applyTail(typeChanged){
 sel.onchange = () => { pushRecent(); lastRecalled = null; applyTail(loadTail(sel.value)); };
 for (const r of document.querySelectorAll('input[name=pside]')) r.onchange = () => { S.pilotSide = r.value; render(); };
 applyTail(true);
-$('verTag').textContent = 'v' + APP_VERSION + ' · built 23-Nov-2026 11:57';
+$('verTag').textContent = 'v' + APP_VERSION + ' · built 25-Nov-2026 08:40';
 document.title = 'CCG W&B v' + APP_VERSION;
 </script>
 </body>
