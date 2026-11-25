@@ -252,7 +252,7 @@ label.f.big input{font-size:24px;font-weight:600}
 .allgear button.all{background:#1f5fbf;border-color:#0d356f;color:#fff}
 .allgear button.some{border-color:#1f5fbf;border-style:dashed}
 .allgear button small{display:block;font-size:10.5px;opacity:.75}
-header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+header{position:sticky;top:0;z-index:40;border-bottom:0}   /* no line or shadow under the tabs: the selected tab flows into the page */
 .favbtn{font:inherit;display:inline-flex;align-items:center;gap:6px;min-height:40px;min-width:44px;padding:0 10px;border-radius:9px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;font-size:20px;line-height:1}
 .favbtn .clk{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 #favListBtn{gap:5px}
@@ -549,8 +549,9 @@ header{position:sticky;top:0;z-index:40;box-shadow:0 2px 6px rgba(0,0,0,.08)}
 
 <script>
 // ---------- Version (raise by 0.01 for every implemented change) ----------
-const APP_VERSION = '0.68';
+const APP_VERSION = '0.69';
 const CHANGELOG = [
+  ['0.69', '25-Nov-2026', 'Removed the line under the tab strip so the selected tab joins the page.'],
   ['0.68', '25-Nov-2026', 'Tabs restyled as a browser-style tab strip, like the 429 Performance app.'],
   ['0.67', '23-Nov-2026', 'Summary tab and PDF: the envelope line adds "+ FMS-12 expanded RH lateral" when the right-side hover exit envelope is in use.'],
   ['0.66', '23-Nov-2026', 'Envelope pill removed from the header; the envelope in use is shown on the Summary tab (and, as before, on the Calculation Sheet and the PDF).'],
@@ -2053,7 +2054,7 @@ function applyTail(typeChanged){
 sel.onchange = () => { pushRecent(); lastRecalled = null; applyTail(loadTail(sel.value)); };
 for (const r of document.querySelectorAll('input[name=pside]')) r.onchange = () => { S.pilotSide = r.value; render(); };
 applyTail(true);
-$('verTag').textContent = 'v' + APP_VERSION + ' · built 25-Nov-2026 08:40';
+$('verTag').textContent = 'v' + APP_VERSION + ' · built 25-Nov-2026 08:43';
 document.title = 'CCG W&B v' + APP_VERSION;
 </script>
 </body>
